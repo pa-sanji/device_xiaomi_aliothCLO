@@ -442,6 +442,10 @@ TARGET_NFC_SKU := pro
 PRODUCT_PACKAGES += \
 	libcurl.vendor
 
+# RCS
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.rcs.supported=1
+
 # RmNet Data
 PRODUCT_SYSTEM_PROPERTIES += \
     persist.rmnet.data.enable=true \
