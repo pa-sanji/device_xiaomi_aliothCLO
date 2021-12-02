@@ -102,7 +102,6 @@ TARGET_INIT_VENDOR_LIB := //$(DEVICE_PATH):libinit_alioth
 BOARD_KERNEL_CMDLINE := \
     androidboot.hardware=qcom \
     androidboot.init_fatal_reboot_target=recovery \
-    androidboot.memcg=1 \
     androidboot.usbcontroller=a600000.dwc3 \
     cgroup.memory=nokmem,nosocket \
     earlycon=msm_geni_serial,0xa90000 \
