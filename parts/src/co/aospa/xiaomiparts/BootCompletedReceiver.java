@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.util.Log;
 
 import co.aospa.xiaomiparts.thermal.ThermalUtils;
+import co.aospa.xiaomiparts.refreshrate.RefreshUtils;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
 
@@ -37,5 +38,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         Log.i(TAG, "Boot completed, starting services");
         ThermalUtils.getInstance(context).startService();
+        RefreshUtils.startService(context);
     }
 }
