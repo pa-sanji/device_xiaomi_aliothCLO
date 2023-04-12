@@ -434,6 +434,9 @@ PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.radio.redir_party_num=1 \
     persist.vendor.radio.sib16_support=1
 
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.software.ipsec_tunnel_migration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.ipsec_tunnel_migration.xml
+
 # QMI
 PRODUCT_PACKAGES += \
     libjson
