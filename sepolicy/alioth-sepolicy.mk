@@ -36,4 +36,5 @@ BOARD_VENDOR_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/wlan
 
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
-    device/xiaomi/alioth/sepolicy/private/xiaomi/camera
+    device/xiaomi/alioth/sepolicy/private/xiaomi/camera \
+    device/xiaomi/alioth/sepolicy/private/xiaomi/sensors
