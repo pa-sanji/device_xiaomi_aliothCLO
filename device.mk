@@ -284,6 +284,42 @@ PRODUCT_PACKAGES += \
 
 TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_BYPASS := false
 
+# Logging
+SPAMMY_LOG_TAGS := \
+    AiAiEcho \
+    AiAiTextClassifier \
+    BaseDepthController \
+    GraphicsEnvironment \
+    Diag_Lib \
+    CCodec \
+    CCodecBuffers \
+    CCodecConfig \
+    Codec2Client \
+    MiStcImpl \
+    SDM \
+    SRE \
+    WifiHAL \
+    WifiService \
+    cnss-daemon \
+    CameraService \
+    ForegroundUtils \
+    sensors \
+    sensors-hal \
+    a2dp_offload \
+    bluetooth-a2dp \
+    BluetoothMetrics \
+    vendor.qti.bluetooth@1.0-ibs_handler \
+    vendor.qti.bluetooth@1.0-patch_dl_manager \
+    vendor.qti.bluetooth@1.0-wake_lock \
+    DisplayManagerService \
+    DisplayModeController \
+    FrameTracker
+
+ifneq ($(TARGET_BUILD_VARIANT),eng)
+PRODUCT_VENDOR_PROPERTIES += \
+    $(foreach tag,$(SPAMMY_LOG_TAGS),log.tag.$(tag)=E)
+endif
+
 # Media
 PRODUCT_PACKAGES += \
     libavservices_minijail_vendor \
