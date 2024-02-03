@@ -151,6 +151,12 @@ PRODUCT_PACKAGES += \
     android.system.net.netd@1.1.vendor
 
 # Camera
+$(call inherit-product-if-exists, vendor/xiaomi/camera/miuicamera.mk)
+
+PRODUCT_SYSTEM_PROPERTIES += \
+    persist.vendor.camera.privapp.list=org.codeaurora.snapcam,com.android.camera \
+    vendor.camera.aux.packagelist=org.codeaurora.snapcam,com.android.camera
+
 PRODUCT_VENDOR_PROPERTIES += \
     camera.disable_zsl_mode=true
 
