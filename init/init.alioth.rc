@@ -97,4 +97,4 @@ on boot && property:ro.boot.product.hardware.sku=pro
     enable nqnfc_2_0_hal_service
 
 on property:ro.boot.hwlevel=*
-    setprop ro.boot.hardware.revision ${ro.boot.hwlevel}
+    setprop ro.boot.hardware.revision ${ro.boot.hwc}_${ro.boot.hwlevel}_${ro.boot.hwversion}
