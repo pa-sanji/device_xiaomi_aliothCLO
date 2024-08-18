@@ -166,6 +166,8 @@ PRODUCT_PACKAGES += \
 $(call inherit-product, frameworks/native/build/phone-xhdpi-6144-dalvik-heap.mk)
 
 # Display
+TARGET_USE_AIDL_QTI_MEMTRACK := true
+
 PRODUCT_VENDOR_PROPERTIES += \
     ro.vendor.display.paneltype=2 \
     ro.vendor.display.sensortype=2 \
