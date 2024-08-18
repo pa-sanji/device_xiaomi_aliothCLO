@@ -13,16 +13,6 @@
      limitations under the License.
 -->
 <compatibility-matrix version="1.0" type="framework">
-    <!-- Consumer IR -->
-    <hal format="hidl">
-        <name>android.hardware.ir</name>
-        <transport>hwbinder</transport>
-        <version>1.0</version>
-        <interface>
-            <name>IConsumerIr</name>
-            <instance>default</instance>
-        </interface>
-    </hal>
     <!-- Fingerprint -->
     <hal format="hidl">
         <name>vendor.xiaomi.hardware.fingerprintextension</name>
