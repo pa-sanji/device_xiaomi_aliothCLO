@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Platform
+TARGET_BOARD_PLATFORM := kona
+
 # A/B
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/launch_with_vendor_ramdisk.mk)
 
@@ -284,9 +287,6 @@ PRODUCT_PACKAGES += \
 
 # Partitions
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
-
-# Platform
-TARGET_BOARD_PLATFORM := kona
 
 # QCRIL
 PRODUCT_VENDOR_PROPERTIES += \
