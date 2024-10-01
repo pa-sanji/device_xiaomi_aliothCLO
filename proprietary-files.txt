@@ -162,9 +162,6 @@ vendor/lib/libsurround_3mic_proc.so|e8e086123e0c1dc17f008f97edb3611cd4c702e1
 vendor/lib/libtinycompress.so|e82e679d14a029e5f665a76ca07fe22d974d5133
 vendor/lib/vendor.qti.hardware.audiohalext@1.0.so|ed13a1c435bbc1320ceedeafab62db39fec2e34d
 vendor/lib/vendor.qti.voiceprint@1.0.so|5325739853aef4d9b7a752cec9e607e4f7e86ebf
-vendor/lib64/hw/audio.primary.kona.so|777216b02371eb0532b97ad1380e8fd0957f6794
-vendor/lib64/hw/sound_trigger.primary.kona.so|f17bc1197d62efc60bdf7fc67b361912d1f3df8b
-vendor/lib64/hw/vendor.qti.hardware.audiohalext@1.0-impl.so|0f59ee3a875a9b01610d324bc95a1bc61f51edc0
 
 # Audio FX - MIUI
 vendor/lib/soundfx/libasphere.so|b2daeb875914a33575c7d7a67429f25d09d35489
