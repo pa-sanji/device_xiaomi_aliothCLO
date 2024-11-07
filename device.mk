@@ -200,6 +200,10 @@ PRODUCT_PACKAGES += \
 # Dalvik
 $(call inherit-product, frameworks/native/build/phone-xhdpi-6144-dalvik-heap.mk)
 
+# Device Settings
+PRODUCT_PACKAGES += \
+    XiaomiParts
+
 # Display
 TARGET_USE_AIDL_QTI_MEMTRACK := true
 
