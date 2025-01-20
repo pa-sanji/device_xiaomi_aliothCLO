@@ -310,6 +310,10 @@ TARGET_COMMON_QTI_COMPONENTS := \
 
 TARGET_NFC_SKU := pro
 
+# GPS
+PRODUCT_PACKAGES += \
+	libcurl.vendor
+
 # Sensors
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.sensors.allow_non_default_discovery=true \
