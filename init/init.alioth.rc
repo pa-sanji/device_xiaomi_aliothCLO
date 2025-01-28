@@ -34,7 +34,9 @@ on post-fs-data
     mkdir /data/vendor/thermal/config 0771 root system
 
 on boot
+    write /sys/touchpanel/double_tap 1
     chown system system /sys/touchpanel/double_tap
+    chmod 0660 /sys/touchpanel/double_tap
     chown system system /sys/class/touch/touch_dev/palm_sensor
     chown system system /sys/class/thermal/thermal_message/sconfig
     copy  /vendor/etc/tunings.txt /mnt/vendor/persist/vpp/tunings.txt
