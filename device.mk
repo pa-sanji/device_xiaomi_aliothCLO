@@ -77,6 +77,15 @@ PRODUCT_VENDOR_PROPERTIES += \
     vendor.audio.spkcal.copy.inhal=true \
     vendor.audio.usb.disable.sidetone=true
 
+PRODUCT_SYSTEM_PROPERTIES += \
+    ro.audio.usb.period_us=20375 \
+    af.resampler.quality=7 \
+    ro.audio.resampler.psd.stopband=132 \
+    ro.audio.resampler.psd.halflength=960 \
+    ro.audio.resampler.psd.cutoff_percent=98 \
+    ro.audio.resampler.psd.tbwcheat=0 \
+    persist.bluetooth.sbc_hd_higher_bitrate=1
+
 PRODUCT_ODM_PROPERTIES += \
     aaudio.mmap_policy=1 \
     ro.vendor.audio.sdk.fluencetype=fluence \
