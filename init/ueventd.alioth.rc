@@ -23,3 +23,6 @@
 /sys/devices/platform/us_prox.0/iio:device* buffer/enable                  0600 system system
 /sys/devices/platform/us_prox.0/iio:device* scan_elements/in_proximity_en  0600 system system
 /sys/devices/platform/us_prox.0/iio:device* scan_elements/in_timestamp_en  0600 system system
+
+# wlan
+/sys/devices/platform/soc/1c00000.qcom,pcie/pci0000:00/0000:00:00.0/0000:01:00.0/net/wlan*/queues/rx-* rps_cpus      0660   system     system
