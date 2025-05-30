@@ -118,6 +118,10 @@ PRODUCT_PACKAGES += \
     android.hardware.boot@1.2-impl-qti.recovery \
     android.hardware.boot@1.2-service
 
+# NetutilsAdd commentMore actions
+PRODUCT_PACKAGES += \
+    android.system.net.netd@1.1.vendor
+
 # Camera
 PRODUCT_VENDOR_PROPERTIES += \
     camera.disable_zsl_mode=true
