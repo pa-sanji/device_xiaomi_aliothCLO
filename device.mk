@@ -323,6 +323,7 @@ PRODUCT_USE_DYNAMIC_PARTITIONS := true
 # QCRIL
 PRODUCT_PACKAGES += \
     android.hardware.radio@1.6.vendor \
+    android.hardware.radio.config@1.0.vendor  \
     android.hardware.radio.config@1.3.vendor \
     android.hardware.radio.deprecated@1.0.vendor \
     android.hardware.secure_element@1.2.vendor \
