@@ -13,11 +13,11 @@
 # limitations under the License.
 
 # QCOM Sepolicy
-BOARD_SEPOLICY_DIRS += \
+BOARD_VENDOR_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/vendor/qcom
 
 # Xiaomi Sepolicy
-BOARD_SEPOLICY_DIRS += \
+BOARD_VENDOR_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/audio \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/bluetooth \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/battery \
@@ -34,3 +34,6 @@ BOARD_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/vibrator \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/wireless \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/wlan
+
+SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
+    device/xiaomi/alioth/sepolicy/private/xiaomi/camera
