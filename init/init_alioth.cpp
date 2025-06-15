@@ -44,6 +44,7 @@ void load_dalvikvm_properties() {
     }
 }
 
+
 void load_redmi_k40() {
     property_override("bluetooth.device.default_name", "Redmi K40");
     property_override("ro.product.brand", "Redmi");
@@ -71,11 +72,6 @@ void load_xiaomi_mi11x() {
     property_override("ro.product.name", "alioth");
 }
 
-// Disable NFC for all variants
-void disable_nfc() {
-    property_override("persist.sys.nfc.disabled", "1");
-}
-
 void vendor_load_properties() {
     std::string region = GetProperty("ro.boot.hwc", "");
     if (access("/system/bin/recovery", F_OK) != 0) {
@@ -89,7 +85,4 @@ void vendor_load_properties() {
     }
 
     load_dalvikvm_properties();
-
-    // Disable NFC for ALL variants
-    disable_nfc();
 }
