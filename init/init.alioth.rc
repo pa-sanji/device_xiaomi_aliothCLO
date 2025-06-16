@@ -35,6 +35,7 @@ on post-fs-data
 
 on boot
     chown system system /sys/touchpanel/double_tap
+    chmod 0644 /sys/touchpanel/double_tap
     chown system system /sys/class/touch/touch_dev/palm_sensor
     chown system system /sys/class/thermal/thermal_message/sconfig
     copy  /vendor/etc/tunings.txt /mnt/vendor/persist/vpp/tunings.txt
