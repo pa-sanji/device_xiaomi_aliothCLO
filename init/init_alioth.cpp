@@ -72,6 +72,7 @@ void load_xiaomi_mi11x() {
     property_override("ro.product.manufacturer", "Xiaomi");
     property_override("ro.product.model", "M2012K11AI");
     property_override("ro.product.name", "alioth");
+    property_override("ro.boot.hardware.nfc", "absent"); // <--- ADD THIS LINE
 }
 
 void vendor_load_properties() {
