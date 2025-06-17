@@ -1,2 +1,5 @@
 # Camera sensor properties
 vendor.camera.sensor.                      u:object_r:vendor_camera_sensor_prop:s0
+
+vendor.camera.aux.packageblacklist         u:object_r:vendor_camera_prop:s0
+vendor.camera.aux.packageexcludelist       u:object_r:vendor_camera_prop:s0
