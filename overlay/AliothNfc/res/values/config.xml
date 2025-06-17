@@ -17,6 +17,4 @@
         <item>pro</item>
     </string-array>
 
-    <bool name="enable_secure_nfc_support">true</bool>
-
 </resources>
