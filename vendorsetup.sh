@@ -1,3 +1,5 @@
 # Shebang is intentionally missing - do not run as a script
 
 base64 -d device/xiaomi/alioth/configs/camera/something > device/xiaomi/alioth/configs/camera/st_license.lic
+
+git clone https://github.com/Sanjivns/extra.git vendor/mine
