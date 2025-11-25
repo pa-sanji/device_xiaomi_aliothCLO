@@ -87,3 +87,8 @@ service nqnfc_2_0_hal_service /vendor/bin/hw/vendor.nxp.hardware.nfc@2.0-service
 
 on boot && property:ro.boot.product.hardware.sku=pro
     enable nqnfc_2_0_hal_service
+
+mkdir /dev/stune 0755 root root
+mkdir /dev/stune/top-app 0755 root root
+mkdir /dev/stune/foreground 0755 root root
+mkdir /dev/stune/background 0755 root root
