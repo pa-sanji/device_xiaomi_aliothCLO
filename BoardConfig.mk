@@ -125,6 +125,13 @@ KERNEL_DEFCONFIG := alioth_defconfig
 
 KERNEL_LLVM_SUPPORT := true
 
+TARGET_KERNEL_ADDITIONAL_FLAGS := \
+    KCFLAGS="-Wno-unused-command-line-argument -Wno-error" \
+    CLANG_TRIPLE=aarch64-linux-gnu- \
+    LLVM=1 \
+    LLVM_IAS=1 \
+    KBUILD_CFLAGS="-fno-pic"
+
 # Metadata
 BOARD_USES_METADATA_PARTITION := true
 

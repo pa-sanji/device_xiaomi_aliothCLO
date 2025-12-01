@@ -1,1 +1,20 @@
-log.tag.libprocessgroup=E
+# Disable QDCM/SDM debug
+vendor.display.qdcm.disable_log=1
+vendor.display.disable_qdcm=1
+debug.sdm.log=0
+vendor.sdm.disable_logs=1
+vendor.sdm.qos.disable=1
+vendor.display.disable_qos=1
+
+# Full SDM log tag suppression
+log.tag.SDM=F
+log.tag.QOS=F
+log.tag.QoSImpl=F
+log.tag.QDCM=F
+log.tag.Display=F
+log.tag.DISPLAY=F
+log.tag.display=F
+log.tag.display.qos=F
+log.tag.SDMA=F
+log.tag.SDMB=F
+log.tag.SDMC=F
