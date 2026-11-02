@@ -1,0 +1,8 @@
+# Belt-and-braces aliases for the misc partition (BCB). The primary label comes
+# from device/qcom/sepolicy_vndr/qva/vendor/kona/file_contexts
+# (/dev/block/platform/soc/1d84000.ufshc/by-name/misc -> misc_block_device);
+# these cover the remaining symlinks ueventd/fs_mgr generate for the same node.
+# Without a misc_block_device label, hal_bootctl_default is denied getattr,
+# bootcontrol_init() aborts -> IBootControl never registers -> vold hangs -> OEM logo.
+/dev/block/by-name/misc                    u:object_r:misc_block_device:s0
+/dev/block/bootdevice/by-name/misc         u:object_r:misc_block_device:s0
