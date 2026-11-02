@@ -147,4 +147,44 @@
 	     <instance>default</instance>
 	  </interface>
       </hal>
+    <!-- QTI GNSS (1.2) -->
+    <hal format="hidl" optional="true">
+        <name>vendor.qti.gnss</name>
+        <transport>hwbinder</transport>
+        <version>1.2</version>
+        <interface>
+            <name>ILocHidlGnss</name>
+            <instance>gnss_vendor</instance>
+        </interface>
+    </hal>
+    <!-- QTI GNSS (2.1) -->
+    <hal format="hidl" optional="true">
+        <name>vendor.qti.gnss</name>
+        <transport>hwbinder</transport>
+        <version>2.1</version>
+        <interface>
+            <name>ILocHidlGnss</name>
+            <instance>gnss_vendor</instance>
+        </interface>
+    </hal>
+    <!-- QTI GNSS (3.0) -->
+    <hal format="hidl" optional="true">
+        <name>vendor.qti.gnss</name>
+        <transport>hwbinder</transport>
+        <version>3.0</version>
+        <interface>
+            <name>ILocHidlGnss</name>
+            <instance>gnss_vendor</instance>
+        </interface>
+    </hal>
+    <!-- QTI GNSS (4.3) -->
+    <hal format="hidl" optional="true">
+        <name>vendor.qti.gnss</name>
+        <transport>hwbinder</transport>
+        <version>4.3</version>
+        <interface>
+            <name>ILocHidlGnss</name>
+            <instance>gnss_vendor</instance>
+        </interface>
+    </hal>
 </compatibility-matrix>
