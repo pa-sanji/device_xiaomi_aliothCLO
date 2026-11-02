@@ -13,40 +13,6 @@
      limitations under the License.
 -->
 <compatibility-matrix version="1.0" type="framework">
-    <!-- Consumer IR -->
-    <hal format="hidl">
-        <name>android.hardware.ir</name>
-        <transport>hwbinder</transport>
-        <version>1.0</version>
-        <interface>
-            <name>IConsumerIr</name>
-            <instance>default</instance>
-        </interface>
-    </hal>
-    <!-- Fingerprint -->
-    <hal format="hidl">
-        <name>vendor.xiaomi.hardware.fingerprintextension</name>
-        <transport>hwbinder</transport>
-        <version>1.0</version>
-        <interface>
-            <name>IXiaomiFingerprint</name>
-            <instance>default</instance>
-        </interface>
-    </hal>
-    <!-- fpc fingerprint HAL Service  -->
-    <hal format="hidl">
-        <name>com.fingerprints.extension</name>
-        <transport>hwbinder</transport>
-        <version>3.0</version>
-        <interface>
-            <name>IFingerprintSensorTest</name>
-            <instance>default</instance>
-        </interface>
-        <interface>
-            <name>IFingerprintNavigation</name>
-            <instance>default</instance>
-        </interface>
-    </hal>
     <!-- Sensors -->
     <hal format="hidl">
         <name>android.hardware.sensors</name>
@@ -58,22 +24,14 @@
         </interface>
     </hal>
     <hal format="hidl" optional="true">
-        <name>vendor.dolby.hardware.dms</name>
-        <version>2.0</version>
-        <interface>
-            <name>IDms</name>
-            <instance>default</instance>
-        </interface>
-    </hal>
-    <hal format="hidl" optional="true">
         <name>vendor.qti.hardware.audiohalext</name>
         <version>1.0</version>
         <interface>
             <name>IAudioHalExt</name>
             <instance>default</instance>
         </interface>
-     </hal>
-     <hal format="hidl">
+    </hal>
+    <hal format="hidl">
         <name>android.hardware.bluetooth.audio</name>
         <transport>hwbinder</transport>
         <version>2.0</version>
@@ -82,71 +40,63 @@
             <name>IBluetoothAudioProvidersFactory</name>
             <instance>default</instance>
         </interface>
-     </hal>
-     <hal format="hidl" optional="true">
-        <name>android.hardware.boot</name>
-        <version>1.2</version>
-        <interface>
-            <name>IBootControl</name>
-            <instance>default</instance>
-        </interface>
-     </hal>
-     <hal format="aidl" optional="true">
+    </hal>
+    <hal format="aidl" optional="true">
         <name>android.hardware.health</name>
         <version>1</version>
         <interface>
             <name>IHealth</name>
             <instance>default</instance>
         </interface>
-     </hal>
-     <hal format="aidl" optional="true">
+    </hal>
+    <hal format="aidl" optional="true">
         <name>android.hardware.light</name>
         <version>2</version>
         <interface>
             <name>ILights</name>
             <instance>default</instance>
         </interface>
-     </hal>
-     <hal format="aidl" optional="true">
-       <name>android.hardware.power</name>
-	<version>4</version>
+    </hal>
+    <hal format="aidl" optional="true">
+        <name>android.hardware.power</name>
+        <version>4</version>
         <interface>
             <name>IPower</name>
             <instance>default</instance>
-    </interface>
-     </hal>
-     <hal format="aidl" optional="true">
+        </interface>
+    </hal>
+    <hal format="aidl" optional="true">
         <name>android.hardware.vibrator</name>
         <version>2</version>
         <interface>
             <name>IVibrator</name>
             <instance>default</instance>
         </interface>
-     </hal>
-     <hal format="aidl" optional="true">
+    </hal>
+    <hal format="aidl" optional="true">
         <name>android.hardware.wifi</name>
         <version>2</version>
         <interface>
             <name>IWifi</name>
             <instance>default</instance>
         </interface>
-     </hal>
-     <hal format="aidl" optional="true">
+    </hal>
+    <hal format="aidl" optional="true">
         <name>android.hardware.wifi.hostapd</name>
         <version>2</version>
         <interface>
             <name>IHostapd</name>
             <instance>default</instance>
         </interface>
-     </hal>
-     <hal format="aidl" optional="true">
-          <name>android.hardware.wifi.supplicant</name>
-	  <version>3</version>
-	     <interface>
-	     <name>ISupplicant</name>
-	     <instance>default</instance>
-	  </interface>
-      </hal>
+    </hal>
+    <hal format="aidl" optional="true">
+        <name>android.hardware.wifi.supplicant</name>
+        <version>3</version>
+        <interface>
+            <name>ISupplicant</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
     <!-- QTI GNSS (1.2) -->
     <hal format="hidl" optional="true">
         <name>vendor.qti.gnss</name>
@@ -185,6 +135,15 @@
         <interface>
             <name>ILocHidlGnss</name>
             <instance>gnss_vendor</instance>
+        </interface>
+    </hal>
+    <!-- AIDL fingerprint (A17) -->
+    <hal format="aidl" optional="true">
+        <name>android.hardware.biometrics.fingerprint</name>
+        <version>4</version>
+        <interface>
+            <name>IFingerprint</name>
+            <instance>default</instance>
         </interface>
     </hal>
 </compatibility-matrix>

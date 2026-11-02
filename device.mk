@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Platform
-TARGET_BOARD_PLATFORM := kona
-
 # A/B
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/launch_with_vendor_ramdisk.mk)
 
@@ -38,9 +35,22 @@ PRODUCT_PACKAGES += \
 PRODUCT_AAPT_CONFIG := normal
 PRODUCT_AAPT_PREF_CONFIG := xxhdpi
 
+# BPF
+# The 4.19 MagicTime kernel carries the 5.10 BPF backports. Report the
+# backported version so netd/bpfloader can use the newer programs.
+PRODUCT_PRODUCT_PROPERTIES += \
+    ro.bpf.kver_override=5.10.239
+
+# Adaptive Suspend
+PRODUCT_PROPERTY_OVERRIDES += \
+    suspend.short_suspend_threshold_millis=5000
+
 # ANT+
 PRODUCT_PACKAGES += \
     com.dsi.ant@1.0.vendor
+
+# ART
+PRODUCT_ENABLE_UFFD_GC := true
 
 # Attestation
 PRODUCT_COPY_FILES += \
@@ -52,14 +62,34 @@ PRODUCT_PACKAGES += \
     libqcomvisualizer \
     libqcomvoiceprocessing
 
+# The prebuilt vendor audio HAL (vendor/lib/hw/audio.primary.alioth.so) has a
+# hard DT_NEEDED on libaudioroute-v34.so, the VNDK-34 flavoured audioroute:
+#
+#   readelf -d .../audio.primary.alioth.so | grep audioroute
+#       [NEEDED] libaudioroute-v34.so
+#       [NEEDED] libaudioroute_ext.so
+#
+# hardware/lineage/compat provides exactly that module (Android.bp:93,
+# prebuilt vndk/v34/{arm,arm64}), which is the same shim LineageOS alioth
+# relies on in its extract-files.py:
+#
+#   .replace_needed('libaudioroute.so', 'libaudioroute-v34.so')
+#
+# Without it the linker cannot load audio.primary.alioth.so, so AudioFlinger
+# never gets a primary module and every listAudioPorts call fails - 2012 of
+# them in penguin_boot2.txt, with no pcm_open and no audio.primary logging at
+# all. It also has to be packaged: nothing in the tree pulls it in
+# automatically.
+PRODUCT_PACKAGES += \
+    libaudioroute-v34
+
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.audio.delta.refresh=true \
     persist.vendor.audio.misound.disable=true \
     persist.vendor.audio.ring.filter.mask=0 \
     ro.audio.monitorRotation=true \
     ro.config.vc_call_vol_steps=11 \
-    ro.vendor.audio.dolby.dax.support=true \
-    ro.vendor.audio.dolby.surround.enable=true \
+    ro.hardware.audio.primary=alioth \
     ro.vendor.audio.enhance.support=false \
     ro.vendor.audio.gain.support=true \
     ro.vendor.audio.karaok.support=true \
@@ -72,10 +102,18 @@ PRODUCT_VENDOR_PROPERTIES += \
     ro.vendor.audio.us.type=mius \
     ro.vendor.audio.zoom.support=true \
     ro.vendor.audio.zoom.type=1 \
-    vendor.audio.dolby.ds2.enabled=false \
-    vendor.audio.dolby.ds2.hardbypass=false \
     vendor.audio.spkcal.copy.inhal=true \
     vendor.audio.usb.disable.sidetone=true
+
+PRODUCT_SYSTEM_PROPERTIES += \
+    ro.audio.usb.period_us=20375 \
+    af.resampler.quality=7 \
+    ro.audio.resampler.psd.stopband=132 \
+    ro.audio.resampler.psd.halflength=960 \
+    ro.audio.resampler.psd.cutoff_percent=98 \
+    ro.audio.resampler.psd.tbwcheat=0 \
+    persist.bluetooth.sbc_hd_higher_bitrate=1 \
+    persist.vendor.audio_hal.dsp_bit_width_enforce_mode=24
 
 PRODUCT_ODM_PROPERTIES += \
     aaudio.mmap_policy=1 \
@@ -85,12 +123,18 @@ PRODUCT_ODM_PROPERTIES += \
     vendor.audio.feature.spkr_prot.enable=false \
     vendor.audio.hal.output.suspend.supported=false \
     vendor.audio.offload.multiple.enabled=true \
-    vendor.audio.offload.track.enable=false
+    vendor.audio.offload.track.enable=false \
+    vendor.audio.offload.buffer.size.kb=256
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/mixer_paths_overlay_static.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths_overlay_static.xml \
-    $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio/audio_policy_configuration.xml
+    $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio/audio_policy_configuration.xml \
+    $(LOCAL_PATH)/configs/audio/audio_effects.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.xml \
+    $(LOCAL_PATH)/configs/audio/audio_io_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_io_policy.conf
 
+# Battery
+PRODUCT_SYSTEM_PROPERTIES += \
+    ro.config.small_battery=true
 
 # Bluetooth
 PRODUCT_PACKAGES += \
@@ -109,7 +153,7 @@ PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.qcom.bluetooth.a2dp_offload_cap=sbc-aptx-aptxtws-aptxhd-aac-ldac-aptxadaptiver2 \
     persist.vendor.qcom.bluetooth.aac_frm_ctl.enabled=true \
     persist.vendor.qcom.bluetooth.aac_vbr_ctl.enabled=true \
-    persist.vendor.qcom.bluetooth.aptxadaptiver2_1_support=false \
+    persist.vendor.qcom.bluetooth.aptxadaptiver2_1_support=true \
     persist.vendor.qcom.bluetooth.enable.splita2dp=true \
     persist.vendor.qcom.bluetooth.enable.swb=false \
     persist.vendor.qcom.bluetooth.enable.swbpm=false \
@@ -117,9 +161,11 @@ PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.qcom.bluetooth.soc=hastings \
     persist.vendor.qcom.bluetooth.twsp_state.enabled=false \
     ro.vendor.bluetooth.wipower=false \
-    vendor.bluetooth.soc=hastings \
     vendor.hw.fm.init=0 \
     vendor.qcom.bluetooth.soc=hastings
+
+PRODUCT_SYSTEM_PROPERTIES += \
+    vendor.bluetooth.soc=hastings
 
 PRODUCT_SYSTEM_EXT_PROPERTIES += \
     persist.vendor.btstack.a2dp_offload_cap=sbc-aptx-aptxtws-aptxhd-aptxadaptiver2-aac-ldac \
@@ -133,13 +179,10 @@ PRODUCT_SYSTEM_EXT_PROPERTIES += \
 
 # Boot
 PRODUCT_PACKAGES += \
-    android.hardware.boot@1.2-impl-qti \
-    android.hardware.boot@1.2-impl-qti.recovery \
-    android.hardware.boot@1.2-service
+    android.hardware.boot-service.qti \
+    android.hardware.boot-service.qti.recovery
 
-# NetutilsAdd commentMore actions
-PRODUCT_PACKAGES += \
-    android.system.net.netd@1.1.vendor
+$(call soong_config_set,QTI_GPT_UTILS,USE_BSG_FRAMEWORK,false)
 
 # Camera
 PRODUCT_VENDOR_PROPERTIES += \
@@ -161,12 +204,12 @@ PRODUCT_PACKAGES += \
     libcamera2ndk_vendor \
     libpng.vendor \
     libstdc++.vendor \
-    libutilscallstack.vendor \
     vendor.qti.hardware.camera.device@1.0.vendor \
     vendor.qti.hardware.camera.postproc@1.0.vendor
 
 PRODUCT_PACKAGES += \
-    libpiex_shim
+    libpiex_shim \
+    libutilscallstack.vendor
 
 # Cgroup and task_profiles
 PRODUCT_COPY_FILES += \
@@ -186,32 +229,51 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.consumerir.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.consumerir.xml
 
 PRODUCT_PACKAGES += \
-    android.hardware.ir@1.0-impl \
-    android.hardware.ir@1.0-service
+    android.hardware.ir-service.xiaomi
 
 # Dalvik
 $(call inherit-product, frameworks/native/build/phone-xhdpi-6144-dalvik-heap.mk)
 
-# Display
-TARGET_USE_AIDL_QTI_MEMTRACK := true
+# Device Settings
+PRODUCT_PACKAGES += \
+    XiaomiParts
 
+# Display
 PRODUCT_VENDOR_PROPERTIES += \
+    persist.sys.sf.native_mode=269 \
     ro.vendor.display.paneltype=2 \
     ro.vendor.display.sensortype=2 \
     vendor.display.qdcm.mode_combine=1 \
-    vendor.display.defer_fps_frame_count=2
+    vendor.display.defer_fps_frame_count=2 \
+    vendor.display.vds_allow_hwc=1 \
+    debug.sf.disable_client_composition_cache=0 \
+    debug.sf.defer_refresh_rate_when_off=1
+
+PRODUCT_ODM_PROPERTIES += \
+    vendor.display.use_smooth_motion=0
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     ro.surface_flinger.set_idle_timer_ms=4000 \
     ro.surface_flinger.set_touch_timer_ms=4000 \
     ro.surface_flinger.set_display_power_timer_ms=1000 \
-    ro.surface_flinger.use_content_detection_for_refresh_rate=true
+    ro.surface_flinger.use_content_detection_for_refresh_rate=true \
+    debug.hwui.skia_tracing_enabled=false \
+    debug.hwui.skia_use_perfetto_track_events=false \
+    debug.sf.treat_170m_as_sRGB=1 \
+    debug.sf.hwc_hotplug_error_via_neg_vsync=1 \
+    debug.sf.hwc_hdcp_via_neg_vsync=1 \
+    ro.surface_flinger.enable_layer_caching=false
+
+PRODUCT_SYSTEM_PROPERTIES += \
+    ro.config.avoid_gfx_accel=true
+
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+    debug.sf.enable_transaction_tracing=false
 
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(LOCAL_PATH)/configs/display/,$(TARGET_COPY_OUT_VENDOR)/etc)
 
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/displayconfig/display_id_4630946736638489729.xml:$(TARGET_COPY_OUT_VENDOR)/etc/displayconfig/display_id_4630946736638489729.xml
+TARGET_USE_AIDL_QTI_MEMTRACK := true
 
 # DPM
 PRODUCT_VENDOR_PROPERTIES += \
@@ -222,8 +284,7 @@ PRODUCT_VENDOR_PROPERTIES += \
     drm.service.enabled=true
 
 PRODUCT_PACKAGES += \
-    android.hardware.drm@1.4-service.clearkey \
-    libcrypto_shim \
+    android.hardware.drm-service.clearkey \
     libcrypto_shim.vendor
 
 # Fastboot
@@ -231,14 +292,21 @@ PRODUCT_PACKAGES += \
     fastbootd
 
 # Fingerprint
+# AIDL, matching PocoF3Releases device_xiaomi_sm8250-common/kona.mk:201.
+# config_biometric_sensors is left empty in the AliothFrameworks overlay so
+# AuthService picks the AIDL path; shipping the HIDL @2.3 service instead only
+# makes the framework ask for a @2.1 HIDL interface that never answers.
+PRODUCT_PACKAGES += \
+    android.hardware.biometrics.fingerprint-service.xiaomi
+
+PRODUCT_VENDOR_PROPERTIES += \
+    persist.vendor.fingerprint.sensor_location=1080|965|115|local:4630946736638489729 \
+    persist.vendor.fingerprint.type=side
+
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/fingerprint/uinput-fpc.kl:$(TARGET_COPY_OUT_VENDOR)/usr/keylayout/uinput-fpc.kl \
     $(LOCAL_PATH)/configs/fingerprint/uinput-fpc.idc:$(TARGET_COPY_OUT_VENDOR)/usr/idc/uinput-fpc.idc \
     frameworks/native/data/etc/android.hardware.fingerprint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.fingerprint.xml
-
-# FRP
-PRODUCT_VENDOR_PROPERTIES += \
-    ro.frp.pst=/dev/block/bootdevice/by-name/frp
 
 # Gatekeeper
 PRODUCT_VENDOR_PROPERTIES += \
@@ -249,6 +317,10 @@ PRODUCT_VENDOR_PROPERTIES += \
 PRODUCT_PRODUCT_PROPERTIES += \
     ro.com.google.ime.height_ratio=1.075 \
     ro.com.google.ime.kb_pad_port_b=8
+
+# GPS
+PRODUCT_PACKAGES += \
+    libcurl.vendor
 
 # Init
 PRODUCT_COPY_FILES += \
@@ -268,20 +340,76 @@ PRODUCT_VENDOR_PROPERTIES += \
     ro.crypto.volume.filenames_mode="aes-256-cts" \
     ro.hardware.keystore_desede=true
 
+# limit DPP downscale ratio
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    vendor.hwc.dpp.downscale=4
+
 # Lineage Health
 PRODUCT_PACKAGES += \
     vendor.lineage.health-service.default
 
 TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_BYPASS := false
 
+# Logging
+SPAMMY_LOG_TAGS := \
+    AiAiEcho \
+    AiAiTextClassifier \
+    BaseDepthController \
+    GraphicsEnvironment \
+    Diag_Lib \
+    CCodec \
+    CCodecBuffers \
+    CCodecConfig \
+    Codec2Client \
+    MiStcImpl \
+    SDM \
+    SRE \
+    WifiHAL \
+    WifiService \
+    cnss-daemon \
+    CameraService \
+    ForegroundUtils \
+    sensors \
+    sensors-hal \
+    a2dp_offload \
+    bluetooth-a2dp \
+    BluetoothMetrics \
+    vendor.qti.bluetooth@1.0-ibs_handler \
+    vendor.qti.bluetooth@1.0-patch_dl_manager \
+    vendor.qti.bluetooth@1.0-wake_lock \
+    DisplayManagerService \
+    DisplayModeController \
+    FrameTracker \
+    QC2GrallocBuffer \
+    tftp_server \
+    LOWI-9.0.1.89.z \
+    wpa_supplicant \
+    InetDiagMessage \
+    QtiCarrierConfigHelper \
+    DeviceStatisticsService \
+    DeviceInfoHidlClient \
+    NearbyDiscovery \
+    NearbyPresence \
+    NearbySharing \
+    GmsClient
+
+ifneq ($(TARGET_BUILD_VARIANT),eng)
+PRODUCT_VENDOR_PROPERTIES += \
+    $(foreach tag,$(SPAMMY_LOG_TAGS),log.tag.$(tag)=E)
+endif
+
 # Media
-PRODUCT_PACKAGES += \
-    libavservices_minijail_vendor \
-    libcodec2_soft_common.vendor \
-    libsfplugin_ccodec_utils.vendor
+TARGET_SUPPORTS_OMX_SERVICE := false
+
+PRODUCT_VENDOR_PROPERTIES += \
+    debug.stagefright.c2inputsurface=-1 \
+    ro.odm.build.media_performance_class=30 \
+    vendor.media.omx=0
 
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/media/media_codecs.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs.xml
+    $(LOCAL_PATH)/configs/media/media_codecs_c2.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_c2.xml \
+    $(LOCAL_PATH)/configs/media/media_codecs_performance_c2.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_performance_c2.xml \
+    $(LOCAL_PATH)/configs/media/video_system_specs.json:$(TARGET_COPY_OUT_VENDOR)/etc/video_system_specs.json
 
 # Namespaces
 PRODUCT_SOONG_NAMESPACES += \
@@ -296,12 +424,15 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.nfc-service.nxp \
     com.android.nfc_extras \
-    Tag
+    libchrome.vendor \
+    NfcNci \
+    Tag \
+    se_nq_extn_client \
+    ls_nq_client \
+    jcos_nq_client
 
 PRODUCT_SYSTEM_PROPERTIES += \
     ro.nfc.port=I2C
-
-TARGET_NFC_SKU := pro
 
 ifneq ($(TARGET_NFC_SKU),)
 NFC_PERMISSIONS_DIR := $(TARGET_COPY_OUT_ODM)/etc/permissions/sku_$(TARGET_NFC_SKU)
@@ -319,18 +450,11 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.se.omapi.ese.xml:$(NFC_PERMISSIONS_DIR)/android.hardware.se.omapi.ese.xml \
     frameworks/native/data/etc/android.hardware.se.omapi.uicc.xml:$(NFC_PERMISSIONS_DIR)/android.hardware.se.omapi.uicc.xml \
     frameworks/native/data/etc/com.android.nfc_extras.xml:$(NFC_PERMISSIONS_DIR)/com.android.nfc_extras.xml \
-    frameworks/native/data/etc/com.nxp.mifare.xml:$(NFC_PERMISSIONS_DIR)/com.nxp.mifare.xml
-
-PRODUCT_PACKAGES += \
-    se_nq_extn_client \
-    ls_nq_client \
-    jcos_nq_client
-
-# NFC vendor blobs
-$(call inherit-product-if-exists, vendor/qcom/common/vendor/nfc/nq/nfc-vendor.mk)
+    frameworks/native/data/etc/com.nxp.mifare.xml:$(TARGET_COPY_OUT_ODM)/etc/permissions/com.nxp.mifare.xml
 
 # Overlays
 PRODUCT_PACKAGES += \
+    aptxalsOverlay \
     AliothCarrierConfig \
     AliothFrameworks \
     AliothNfc \
@@ -343,28 +467,63 @@ PRODUCT_PACKAGES += \
     SettingsProviderM2012K11AC \
     SettingsProviderM2012K11AG \
     SettingsProviderM2012K11AI \
+    WifiMainline \
     WifiOverlayM2012K11AC \
     WifiOverlayM2012K11AG \
-    WifiOverlayM2012K11AI
+    WifiOverlayM2012K11AI \
+    WifiResTarget
 
 # Partitions
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 
+# Phantom process monitoring
+PRODUCT_PRODUCT_PROPERTIES += \
+    sys.fflag.override.settings_enable_monitor_phantom_procs=false
+
+# Platform
+TARGET_BOARD_PLATFORM := kona
+
 # QCRIL
 PRODUCT_PACKAGES += \
     android.hardware.radio@1.6.vendor \
-    android.hardware.radio.config@1.0.vendor  \
     android.hardware.radio.config@1.3.vendor \
     android.hardware.radio.deprecated@1.0.vendor \
     android.hardware.secure_element@1.2.vendor \
     android.hardware.wifi.hostapd@1.0.vendor
 
+PRODUCT_SYSTEM_PROPERTIES += \
+    persist.vendor.radio.report_codec=1 \
+    persist.radio.NO_STAPA=1 \
+    persist.radio.VT_HYBRID_ENABLE=1 \
+    persist.radio.dynamic_sar=false
+
 PRODUCT_VENDOR_PROPERTIES += \
+    persist.radio.multisim.config=dsds \
+    persist.vendor.data.mode=concurrent \
+    persist.vendor.radio.add_power_save=1 \
+    persist.vendor.radio.apm_sim_not_pwdn=1 \
+    persist.vendor.radio.atfwd.start=true \
     persist.vendor.radio.cdma_cap=true \
+    persist.vendor.radio.custom_ecc=1 \
     persist.vendor.radio.data_con_rprt=1 \
     persist.vendor.radio.data_ltd_sys_ind=1 \
+    persist.vendor.radio.dynamic_sar=1 \
+    persist.vendor.radio.enable_temp_dds=true \
+    persist.vendor.radio.enableadvancedscan=true \
     persist.vendor.radio.force_ltd_sys_ind=1 \
-    persist.vendor.radio.manual_nw_rej_ct=1
+    persist.vendor.radio.force_on_dc=true \
+    persist.vendor.radio.manual_nw_rej_ct=1 \
+    persist.vendor.radio.mbn_cdma=/vendor/firmware_mnt/image/modem_pr/mcfg/configs/mcfg_sw/oem_sw_j11.txt \
+    persist.vendor.radio.procedure_bytes=SKIP \
+    persist.vendor.radio.rat_on=combine \
+    persist.vendor.radio.redir_party_num=1 \
+    persist.vendor.radio.sib16_support=1
+
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.software.ipsec_tunnel_migration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.ipsec_tunnel_migration.xml
+
+# ION
+$(call soong_config_set_bool,libion,legacy_impl,true)
 
 # QMI
 PRODUCT_PACKAGES += \
@@ -381,6 +540,7 @@ TARGET_COMMON_QTI_COMPONENTS := \
     display \
     gps \
     init \
+    keymaster \
     media \
     overlay \
     perf \
@@ -389,9 +549,34 @@ TARGET_COMMON_QTI_COMPONENTS := \
     wfd \
     wlan
 
-# GPS
-PRODUCT_PACKAGES += \
-	libcurl.vendor
+TARGET_NFC_SKU := pro
+
+# RCS
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.rcs.supported=1
+
+# Persistent logcat: keep a rotating logcat in /data/misc/logd so a failed boot
+# can be diagnosed from recovery (adb pull /data/misc/logd). Small footprint.
+# NOTE: must be PRODUCT_SYSTEM_PROPERTIES — PRODUCT_PROPERTY_OVERRIDES lands in
+# /vendor/build.prop on this tree, where vendor_init lacks set permission on
+# logpersistd_logging_prop (system_public_prop). That produced 4 AVC denials.
+PRODUCT_SYSTEM_PROPERTIES += \
+    persist.logd.logpersistd=logcatd \
+    persist.logd.logpersistd.size=16 \
+    persist.logd.logpersistd.rotate_kbytes=2048 \
+    persist.logd.logpersistd.buffer=all
+
+# RmNet Data
+PRODUCT_SYSTEM_PROPERTIES += \
+    persist.rmnet.data.enable=true \
+    persist.data.wda.enable=true \
+    persist.data.df.dl_mode=5 \
+    persist.data.df.ul_mode=5 \
+    persist.data.df.agg.dl_pkt=10 \
+    persist.data.df.agg.dl_size=4096 \
+    persist.data.df.mux_count=8 \
+    persist.data.df.iwlan_mux=9 \
+    persist.data.df.dev_name=rmnet_usb0
 
 # Sensors
 PRODUCT_VENDOR_PROPERTIES += \
@@ -423,7 +608,7 @@ PRODUCT_SHIPPING_API_LEVEL := 30
 
 # SoC Property
 PRODUCT_VENDOR_PROPERTIES += \
-    ro.soc.model=SM8250
+    ro.soc.model=SM8250-AC
 
 # Storage
 PRODUCT_VENDOR_PROPERTIES += \
@@ -432,11 +617,13 @@ PRODUCT_VENDOR_PROPERTIES += \
 PRODUCT_PRODUCT_PROPERTIES += \
     persist.sys.fuse.passthrough.enable=true
 
-# Subsystem silent restart
-PRODUCT_VENDOR_PROPERTIES += \
-    persist.vendor.ssr.restart_level=ALL_ENABLE
-
 # Thermal
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/thermal/thermal-india-mgame.conf:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-india-mgame.conf \
+    $(LOCAL_PATH)/configs/thermal/thermal-india-tgame.conf:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-india-tgame.conf \
+    $(LOCAL_PATH)/configs/thermal/thermal-mgame.conf:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-mgame.conf \
+    $(LOCAL_PATH)/configs/thermal/thermal-tgame.conf:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-tgame.conf
+
 PRODUCT_VENDOR_PROPERTIES += \
     vendor.sys.thermal.data.path=/data/vendor/thermal/
 
@@ -447,9 +634,6 @@ PRODUCT_PACKAGES += \
     update_verifier
 
 # USB
-# The 4.19 QCOM USB product makefile only enables the AIDL gadget HAL for
-# newer kernels. A17 needs it; without it adb/functionfs falls back to the
-# legacy configfs rules and never enumerates.
 PRODUCT_HAS_GADGET_HAL := true
 
 # Vendor
@@ -462,31 +646,9 @@ PRODUCT_COPY_FILES += \
 # Vibrator
 $(call inherit-product, hardware/xiaomi/aidl/vibrator/vibrator-vendor-product.mk)
 
-# Persistent logcat: keep a rotating logcat in /data/misc/logd so a failed boot
-# can be diagnosed from recovery (adb pull /data/misc/logd). Small footprint.
-# NOTE: must be PRODUCT_SYSTEM_PROPERTIES — PRODUCT_PROPERTY_OVERRIDES lands in
-# /vendor/build.prop on this tree, where vendor_init lacks set permission on
-# logpersistd_logging_prop (system_public_prop).
-PRODUCT_SYSTEM_PROPERTIES += \
-    persist.logd.logpersistd=logcatd \
-    persist.logd.logpersistd.size=16 \
-    persist.logd.logpersistd.rotate_kbytes=2048 \
-    persist.logd.logpersistd.buffer=all
-
 # VNDK
 PRODUCT_PACKAGES += \
-    android.hardware.drm@1.4.vendor \
-    android.hardware.gatekeeper@1.0.vendor \
-    android.hardware.keymaster@4.1.vendor \
-    android.hardware.neuralnetworks@1.3.vendor
-
-PRODUCT_COPY_FILES += \
-    prebuilts/vndk/v33/arm/arch-arm-armv7-a-neon/shared/vndk-core/libstagefright_foundation.so:$(TARGET_COPY_OUT_VENDOR)/lib/libstagefright_foundation-v33.so \
-    prebuilts/vndk/v33/arm64/arch-arm64-armv8-a/shared/vndk-core/libstagefright_foundation.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libstagefright_foundation-v33.so
-
-# VPP tunings
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/tunings.txt:$(TARGET_COPY_OUT_VENDOR)/etc/tunings.txt
+    android.hardware.drm@1.4.vendor
 
 # WLAN
 PRODUCT_PACKAGES += \
@@ -499,7 +661,3 @@ PRODUCT_COPY_FILES += \
 # WFD
 PRODUCT_PACKAGES += \
     libwfdaac_vendor:32
-
-# XiaomiParts
-PRODUCT_PACKAGES += \
-    XiaomiParts

@@ -10,14 +10,7 @@ vendor/etc/init/vendor.qti.adsprpc-service.rc
 vendor/etc/init/vendor.qti.cdsprpc-service.rc
 vendor/etc/init/vendor.qti.hardware.dsp@1.0-service.rc
 vendor/etc/seccomp_policy/vendor.qti.hardware.dsp.policy
-vendor/lib/libadsp_default_listener.so
-vendor/lib/libadsprpc.so
-vendor/lib/libcdsp_default_listener.so
-vendor/lib/libcdsprpc.so
-vendor/lib/libmdsprpc.so
-vendor/lib/libsdsprpc.so
-vendor/lib/libsysmon_cdsp_skel.so
-vendor/lib/vendor.qti.hardware.dsp@1.0.so
+vendor/lib/libfastcrc.so
 vendor/lib64/libadsp_default_listener.so
 vendor/lib64/libadsprpc.so
 vendor/lib64/libcdsp_default_listener.so
@@ -82,8 +75,6 @@ vendor/lib/rfsa/adsp/misound_res_spk.bin|ae80a9d54d0325be1e4a89dd8a5d683b10e32d4
 vendor/etc/audio_configs.xml|eb74ffb11b3b5190bb8070f84de0798ed53ebc87
 vendor/etc/audio_configs_stock.xml|0bd072df25ff1641701bf9fa066bdfefd3b52565
 vendor/etc/audio_effects.conf|49e00ca08a1cc3688d2f88bbf67fae5a5ebeabb4
-vendor/etc/audio_effects.xml|d63f0289e1e2209a2c27c70eaba417c4d688def6
-vendor/etc/audio_io_policy.conf|7029d619418102330e4bd2187b8ab56b4b7cf26b
 vendor/etc/audio_platform_info.xml|cbbe1bc50e43aa18f67a726a773c9f32549da609
 vendor/etc/audio_platform_info_intcodec.xml|e92ca8f1da14867d9e8711067713a0fd4559f111
 vendor/etc/audio_platform_info_qrd.xml|22fedc76c434063c1b905055b187a75c37ec7933
@@ -103,7 +94,6 @@ vendor/etc/sound_trigger_mixer_paths.xml|c674e5b33fc4c444c31da43344a88c82dd590e1
 vendor/etc/sound_trigger_platform_info.xml|759023d5690a3e1bc58bd929ef1db017074be437
 
 # Audio - MIUI
-vendor/bin/audioflacapp|b8277fa951476e4212380c5d29f8d9732e38eb32
 vendor/etc/acdbdata/Forte/Forte_Bluetooth_cal.acdb|475727c43d190c7cb16f8c52d273f5d72148b638
 vendor/etc/acdbdata/Forte/Forte_General_cal.acdb|e2e86c7ab3226b8df0b27f27f9a907b9288350de
 vendor/etc/acdbdata/Forte/Forte_Global_cal.acdb|12959c2ce91779bae89e189d99fa1a85dd41ed0a
@@ -113,21 +103,11 @@ vendor/etc/acdbdata/Forte/Forte_Headset_cal.acdb|59c3fa0264997ec71f5920ea815f100
 vendor/etc/acdbdata/Forte/Forte_Speaker_cal.acdb|374dd9c6a64781c1768177411506cd596cc0063f
 vendor/etc/acdbdata/Forte/Forte_workspaceFile.qwsp|f52ee13837b2f8a048db39a96fd8e466fe7f4971
 vendor/etc/acdbdata/adsp_avs_config.acdb|51f049b97e1d0b56faa1cf3713682899f7522c1a
-vendor/lib/hw/audio.primary.kona.so|e809a12d17991a4aa37afa5b01f9a9eacccd3657
+vendor/lib/hw/audio.primary.kona.so:vendor/lib/hw/audio.primary.alioth.so;FIX_SONAME|7a028dea19463661429e2bbc3307cee72b1610bf
 vendor/lib/hw/sound_trigger.primary.kona.so|a5baa2d64c31b1dd932bc708c62b70cf6678a651
 vendor/lib/hw/vendor.qti.hardware.audiohalext@1.0-impl.so|ee89b7cb4e0476688ac8c1a669dfe89c660b1a76
 vendor/lib/vndk/libxlog.so|dad5169deb3296ca1ff4d7e9546e4229cda277b9
-vendor/lib/libOmxAacDec.so|f4ec822166f510f69153b325b377a074d97ab191
-vendor/lib/libOmxAlacDec.so|5785d920e772492bd3c2f1290bf52d3f31249bfe
-vendor/lib/libOmxAmrDec.so|5134226311a5b3913061b25afcac447214c36b0f
-vendor/lib/libOmxAmrwbplusDec.so|f49babbde43650393dd2d97f86204052200acef8
-vendor/lib/libOmxApeDec.so|6533f6a711509861cb40c37c6e03f6050bf00768
-vendor/lib/libOmxDsdDec.so|f74936badeb8303b2bb17475b9cd157b1c81131c
-vendor/lib/libOmxEvrcDec.so|827e34f3068a733c39772d46f3757e42e21975c9
-vendor/lib/libOmxG711Dec.so|92bf8d3d84c6fb86584c880128b8e46b9faa7797
-vendor/lib/libOmxQcelp13Dec.so|44698fe731f52e64f4646c6262c9b4adba3d807b
-vendor/lib/libOmxWmaDec.so|8d6749f293753020fe6dc2aa37cb9b2dbbafe8ed
-vendor/lib/liba2dpoffload.so|d533c2929ff579f7d04ab188d6dae7aaf8d8d899
+vendor/lib/liba2dpoffload.so:vendor/lib/liba2dpoffload_alioth.so;FIX_SONAME|77e768638b9fa6144f9a33f76e042cbb1b2b884e
 vendor/lib/libacdb-fts.so|c004ee5348c2098a2cc9ee9431e29dd4224a2f5f
 vendor/lib/libacdbloader.so|b0e18f5b43764fbe900233784105e7856b15e722
 vendor/lib/libacdbrtac.so|bd16054791ba75272957f62cd0b357df14bedc31
@@ -137,27 +117,28 @@ vendor/lib/libadpcmdec.so|297d8fecff85b6dc67ff19e788bcf3f1286014a0
 vendor/lib/libaudcal.so|a7fbab7de1f9eda1aeb6ad0fc8ff76388575e132
 vendor/lib/libaudio_log_utils.so|da677ff82cbec353a2851a7556a2fa37992d6e2c
 vendor/lib/libaudioalsa.so|486cde43c2d135e0cceb862126b56ef0647d3a71
-vendor/lib/libaudioconfigstore.so|1b53f032ae43dd335ada7755642cb62864890165
 vendor/lib/libaudiocloudctrl.so|101619a534748f58e76f0dd1b06837aa319f2724
+vendor/lib/libaudioconfigstore.so|1b53f032ae43dd335ada7755642cb62864890165
 vendor/lib/libaudioparsers.so|7569d3f969fe586145970f30c90d395074f577e4
 vendor/lib/libaudioroute_ext.so|9c64c2384952947590b848ace49bfad185d60a61
 vendor/lib/libcapiv2svacnn.so|b00484a75db67ea914a507eb48b63404dfbc7654
 vendor/lib/libcapiv2svarnn.so|97f6bd6b25479fbf0f4f7cb06d9f1a462266f22a
 vendor/lib/libcapiv2vop.so|1cceaefcc1ca55de5bc932a846091e6702c5d508
 vendor/lib/libdrc.so|b066f176f119847059c5aa148f73e1b042fbeab3
-vendor/lib/libdsd2pcm.so|c5ab1afd7a5a23bf83d80b5ac74247c3dd2085af
+vendor/lib/libfcsam.so|d61b6e6edb30c29fdd64aa7adf9faed1e58e556f
 vendor/lib/libgcs-calwrapper.so|d48d45cbd9406667e5542ab97070b041039c2ad3
 vendor/lib/libgcs-ipc.so|73253159d520d2adf15c0a831266e73f8301bac4
 vendor/lib/libgcs-osal.so|9f023437197fd01fdadd61844ba0bff88dc8d6a4
 vendor/lib/libgcs.so|033445b17fa41351cd42e9ed4f0a8ef28fbe69ee
 vendor/lib/libhdmipassthru.so|95fa8a885c3e6139aab1d785614fa2a6b34fa480
 vendor/lib/liblistensoundmodel2.so|5f5c4e2d6b7e4184f863e7e433511b7af781fd0c
-vendor/lib/libmulawdec.so|89ebb1d9e77911f1abe37405016839d8436a9825
 vendor/lib/libmmhardware.so|b5aad1519c0735a5c643ecf3685ef8368f68b700
+vendor/lib/libmulawdec.so|89ebb1d9e77911f1abe37405016839d8436a9825
 vendor/lib/libqtigef.so|3fba1e7a22a0b75be6bace643aaa8ead110c1233
 vendor/lib/libresampler.so|8edd3e46d46ad53469487f172219aec3a5a840b5
 vendor/lib/libsmwrapper.so|71a8166b84c4c9a06f1308370d23e68a1b243e0e
-vendor/lib/libssrec.so|8c5ec54e7f550fc68e6c6732e473f4649cf88e4e
+vendor/lib/libssrec.so:vendor/lib/libssrec_alioth.so;FIX_SONAME|0eaecec001f68b72310474c8841005ff3ca67d3e
+vendor/lib/libstagefright_soft_qtiflacdec.so|4e8d9ecb64fd90c95cd9700308e5aec6a952a38c
 vendor/lib/libsurround_3mic_proc.so|e8e086123e0c1dc17f008f97edb3611cd4c702e1
 vendor/lib/libtinycompress.so|e82e679d14a029e5f665a76ca07fe22d974d5133
 vendor/lib/vendor.qti.hardware.audiohalext@1.0.so|ed13a1c435bbc1320ceedeafab62db39fec2e34d
@@ -202,7 +183,6 @@ vendor/lib/hw/vendor.qti.hardware.bluetooth_audio@2.1-impl.so
 vendor/lib/hw/vendor.qti.hardware.bluetooth_sar@1.1-impl.so
 vendor/lib/hw/vendor.qti.hardware.btconfigstore@1.0-impl.so
 vendor/lib/hw/vendor.qti.hardware.btconfigstore@2.0-impl.so
-vendor/lib/hw/vendor.qti.hardware.fm@1.0-impl.so
 vendor/lib/btaudio_offload_if.so
 vendor/lib/libbluetooth_audio_session_qti.so
 vendor/lib/libbluetooth_audio_session_qti_2_1.so
@@ -219,6 +199,8 @@ vendor/lib64/hw/vendor.qti.hardware.bluetooth_sar@1.1-impl.so
 vendor/lib64/hw/vendor.qti.hardware.btconfigstore@1.0-impl.so
 vendor/lib64/hw/vendor.qti.hardware.btconfigstore@2.0-impl.so
 vendor/lib64/hw/vendor.qti.hardware.fm@1.0-impl.so
+vendor/lib/vendor.qti.hardware.fm@1.0.so
+vendor/lib64/vendor.qti.hardware.fm@1.0.so
 vendor/lib64/btaudio_offload_if.so
 vendor/lib64/libbluetooth_audio_session_qti.so
 vendor/lib64/libbluetooth_audio_session_qti_2_1.so
@@ -261,36 +243,6 @@ vendor/etc/camera/seg_quantized.dlc|1c982e1875c29994792ae95031fab93af3661dd8
 vendor/etc/camera/sr_params.xml|42feb86755831f5a0c10be1373b90bf71f678af3
 vendor/etc/camera/vidhance_calibration|be41cd8f849671e99b0b21c0c786fbc97ad5305a
 vendor/firmware/CAMERA_ICP.elf|01c99ec883dea12ba5c182bfebf081b8f21d1d38
-vendor/lib/libFace3DTA.so|3d1dd9fcdc6166ce64b558ff94d227643f648068
-vendor/lib/libFace3D_hlos.so|3ab549b0d56db8f144b846cdf13df4edd25f2285
-vendor/lib/libQ6MSFR_manager_stub.so|02ff281cd42917ec169a05d606de70cf0063c526
-vendor/lib/libbitmlengine.so|dc8204676e4569c12a734ec1b98d03aedee3b546
-vendor/lib/libcamera_nn_stub.so|e70adb7aa1ed248a27ba89a71e7ec52495ede036
-vendor/lib/libcamera_nn_stub.so|e70adb7aa1ed248a27ba89a71e7ec52495ede036
-vendor/lib/libcamerapostproc.so|3c5bc4b22245e42911d59a5abd92de9aad49eb83
-vendor/lib/libcamxexternalformatutils.so|b741174f17c441d89ff6b333664c25f7922e0d25
-vendor/lib/libcamxfacialfeatures.so|05cd39478a63796a43be26862aba1be6660a9050
-vendor/lib/libcamxfdalgo.so|b7b417f1c57521355e8e10b8a127cfd4fabdbec3
-vendor/lib/libcamxfdengine.so|51b83348b3b80567afc3481d9b06e2a7e090c0dc
-vendor/lib/libcamxifestriping.so|9dde90928b8086be1b170adc3ebe098f36f2940e
-vendor/lib/libcamximageformatutils.so|80912e9e59bb3a1409dcb1fec7b9d619ef0986df
-vendor/lib/libcamxncs.so|442bb2f32177854796f29d0a27e4c7ab9b13a1be
-vendor/lib/libcamxstatscore.so|5f02c6d29d7c645f493762c3b1ad402ef99bb4e1
-vendor/lib/libcamxswprocessalgo.so|22a38042c0520d84e5ce8781e5aa1b21c4c0a5ee
-vendor/lib/libcamxtintlessalgo.so|b988faae860d549cee71a3d5f3d2f01acd77f284
-vendor/lib/libchilog.so|bb6e1940f2073c5eb2d2aaeb9de8a9c2b788f29f
-vendor/lib/libcom.qti.chinodeutils.so|d41998e8110b77637770baf81f83bc12ea4e1d68
-vendor/lib/libface3d_dev.so|b305b13438ac06916a7102f44ca37dbc2afc4fb1
-vendor/lib/libfcsam.so|d61b6e6edb30c29fdd64aa7adf9faed1e58e556f
-vendor/lib/libipebpsstriping.so|2b33de75eb902abca711982db3f393dad7f6db72
-vendor/lib/libmmcamera_faceproc.so|bff36589f38f4a4447f7a9543aa6b4b7045cf825
-vendor/lib/libmmcamera_faceproc2.so|21b308e0c901c94a1647f8d194f74635918e6943
-vendor/lib/libnanopb.so|1189d5617875576437cf14ff77bcaa2beaf19775
-vendor/lib/libofflinelog.so|b6c797011ccaf12fc21a027e07de9813e0c63951
-vendor/lib/libos.so|16d49ebd400ab22b421242849fc3ae2313a080fb
-vendor/lib/libswregistrationalgo.so|1ebf035d4b87394a8f58784d46e818288f561324
-vendor/lib/libsynx.so|70989469e7596d6f4dc2cb9569a1d8c6f04bc18e
-vendor/lib/libthreadutils.so|85d2502fc45c0073cb8841f414d6149e70d0a4f3
 vendor/lib64/camera/components/com.arcsoft.node.deflicker.so|da84a19daff270da5ce90c934d79ca71564b2186
 vendor/lib64/camera/components/com.arcsoft.node.smoothtransition.so|b946c05107efb004bcd3fd3997b37e35601f1b35
 vendor/lib64/camera/components/com.arcsoft.node.superportrait.so|b3c5170588b94e1c299d1c977c5af656c4113ad1
@@ -609,9 +561,6 @@ vendor/bin/ssgtzd
 vendor/etc/init/ssgtzd.rc
 vendor/lib64/libminksocket.so
 
-# Consumer IR - MIUI
-vendor/lib64/hw/consumerir.default.so|c5c8947ace6c6479914a57ad609a961eebf0b949
-
 # CVP
 vendor/lib/rfsa/adsp/libcvpdsp_skel.so
 vendor/lib64/libcvp2.so
@@ -683,32 +632,12 @@ vendor/lib64/libdiag.so
 # Display
 vendor/bin/hw/vendor.display.color@1.0-service
 vendor/bin/feature_enabler_client
-vendor/bin/ppd
-vendor/bin/qdcmss
 vendor/etc/display/advanced_sf_offsets.xml
 vendor/etc/init/feature_enabler_client.rc
-vendor/etc/init/qdcmss.rc
 vendor/etc/init/vendor.display.color@1.0-service.rc
 vendor/lib64/libdisp-aba.so
-vendor/lib64/libdisplayqos.so
-vendor/lib64/libdisplayskuutils.so
 vendor/lib64/libdpps.so
-vendor/lib64/libhdr_tm.so
 vendor/lib64/libmm-hdcpmgr.so
-vendor/lib64/libqseed3.so
-vendor/lib64/libsdm-color.so
-vendor/lib64/libsdm-colormgr-algo.so
-vendor/lib64/libsdm-diag.so
-vendor/lib64/libsdm-disp-vndapis.so
-vendor/lib64/libsdmextension.so
-vendor/lib64/libtinyxml2_1.so
-vendor/lib64/vendor.display.color@1.0.so
-vendor/lib64/vendor.display.color@1.1.so
-vendor/lib64/vendor.display.color@1.2.so
-vendor/lib64/vendor.display.color@1.3.so
-vendor/lib64/vendor.display.color@1.4.so
-vendor/lib64/vendor.display.color@1.5.so
-vendor/lib64/vendor.display.postproc@1.0.so
 
 # Display (Configs) - MIUI
 vendor/etc/default.lm|ccf299a48b5637d96c1033d56b5094d8dd7767dd
@@ -788,18 +717,8 @@ vendor/lib64/vendor.qti.imsrtpservice@3.0-service-Impl.so
 vendor/lib64/vendor.qti.imsrtpservice@3.0.so
 
 # Keymaster
-vendor/bin/hw/android.hardware.gatekeeper@1.0-service-qti
-vendor/bin/hw/android.hardware.keymaster@4.0-service-qti
-vendor/bin/hw/android.hardware.keymaster@4.1-service-qti
 vendor/bin/keymasterd
-vendor/etc/init/android.hardware.gatekeeper@1.0-service-qti.rc
-vendor/etc/init/android.hardware.keymaster@4.1-service-qti.rc
 vendor/etc/init/keymasterd.rc
-vendor/lib64/hw/android.hardware.gatekeeper@1.0-impl-qti.so
-vendor/lib64/libkeymasterdeviceutils.so
-vendor/lib64/libkeymasterprovision.so
-vendor/lib64/libkeymasterutils.so
-vendor/lib64/libqtikeymaster4.so
 vendor/lib64/libspcom.so
 
 # MDM - MIUI
@@ -808,25 +727,18 @@ vendor/bin/mdm_helper_proxy|e7ba5764336a32454e4f8de6ff3e1a9c9c2a61bd
 vendor/bin/mdm_helper|aeb8aad56538231d57b7e945c918da39f0c19941
 vendor/lib64/libmdmimgload.so|5f9a20c24dd7f981eec4618769ef74ade0704d54
 
-# Media (Dolby) - MIUI
-vendor/bin/hw/vendor.dolby.hardware.dms@2.0-service|ff827406bbcd1c82e790730bb017b7af38850004
-vendor/etc/dolby/dax-default.xml|d28bc00c53fc1bfb53a5f02e7ddfad4697ba697c
-vendor/etc/init/vendor.dolby.hardware.dms@2.0-service.rc|29296ebfe89b2697fec573be73cc3757fd97bed6
-vendor/etc/media_codecs_dolby_audio.xml|a794eb15fc198d0285510260025cd99b53fa174f
-vendor/etc/vintf/manifest/manifest_vendor.dolby.hardware.dms.xml|c8095f649de19b80271fb429b4b6b439297a0678
-vendor/lib/libdapparamstorage.so|d1952f09354f414238e5bd0f57dd0d3f85b8f769
-vendor/lib/libdeccfg.so|c9ea6a462e3a0d00e31223bf2a9c5dd84beff122
-vendor/lib/libstagefright_soft_ac4dec.so|81400862e01f07d48ee99cefa385e84067ecedc0
-vendor/lib/libstagefright_soft_ddpdec.so|ead5f3168180c52f9d29654402081152c23448d6
-vendor/lib/libstagefright_soft_qtiflacdec.so|4e8d9ecb64fd90c95cd9700308e5aec6a952a38c
-vendor/lib/soundfx/libhwdap.so|4832a5e6e67831980f7d1c68727335567fe9dc53
-vendor/lib/soundfx/libswgamedap.so|93101491221a06b02ab02b12288d00110645e48f
-vendor/lib/soundfx/libswvqe.so|4123ad118d98e3bc2573f0e972703789d2451637
-vendor/lib/vendor.dolby.hardware.dms@2.0.so|2bf537bbf5c413527e5c648b8e63b95f904f7532
-vendor/lib64/libdapparamstorage.so|a8e3bb20ee8579a13d5beef17a0ad251055e9d7b
-vendor/lib64/libdlbdsservice.so|f3225b3ee8778f609effcb313ca64f32c7494f5e
-vendor/lib64/vendor.dolby.hardware.dms@2.0-impl.so|e90be71a671e64662742b6ee36d7060ed9974726
-vendor/lib64/vendor.dolby.hardware.dms@2.0.so|2020b5fd9abac65520224069bbe75d5e76d3f158
+# Media (Codec2)
+vendor/bin/hw/vendor.qti.media.c2@1.0-service
+vendor/etc/init/vendor.qti.media.c2@1.0-service.rc
+vendor/etc/seccomp_policy/codec2.vendor.base-arm.policy
+vendor/etc/seccomp_policy/codec2.vendor.ext-arm.policy
+vendor/etc/vintf/manifest/c2_manifest_vendor.xml
+vendor/lib/libqcodec2_base.so
+vendor/lib/libqcodec2_basecodec.so
+vendor/lib/libqcodec2_core.so
+vendor/lib/libqcodec2_platform.so
+vendor/lib/libqcodec2_utils.so
+vendor/lib/libqcodec2_v4l2codec.so
 
 # MMI
 vendor/bin/hw/vendor.qti.hardware.factory@1.0-service
@@ -842,8 +754,8 @@ vendor/lib/libmmosal.so
 vendor/lib64/libmmosal.so
 
 # NFC - MIUI
-vendor/etc/libnfc-nxp_RF.conf|4fbc1ee7ede5ab587671258d178b0f6e171428b1
-vendor/lib/libsn100u_fw.so|127d8580e89f9b6170abf7625c6e0d5433227aff
+vendor/etc/libnfc-nxp_RF.conf:vendor/libnfc-nxp_RF.conf|4fbc1ee7ede5ab587671258d178b0f6e171428b1
+vendor/lib/libsn100u_fw.so:vendor/lib64/libsn100u_fw.so|127d8580e89f9b6170abf7625c6e0d5433227aff
 
 # NPU
 vendor/bin/npu_launcher
@@ -857,17 +769,6 @@ vendor/lib64/unnhal-acc-hta.so
 # OpenVX
 vendor/lib/libopenvx.so
 vendor/lib64/libopenvx.so
-
-# Neural Networks
-vendor/bin/hw/android.hardware.neuralnetworks@1.3-service-qti
-vendor/etc/init/android.hardware.neuralnetworks@1.3-service-qti.rc
-vendor/etc/vintf/manifest/android.hardware.neuralnetworks@1.3-service-qti-hta.xml
-vendor/etc/vintf/manifest/android.hardware.neuralnetworks@1.3-service-qti.xml
-vendor/lib/rfsa/adsp/libhexagon_nn_skel.so
-vendor/lib64/libhexagon_nn_stub.so
-vendor/lib64/unnhal-acc-adreno.so
-vendor/lib64/unnhal-acc-common.so
-vendor/lib64/unnhal-acc-hvx.so
 
 # PD
 vendor/bin/pd-mapper
@@ -929,7 +830,6 @@ vendor/lib64/libqmi_encdec.so
 vendor/lib64/libqmi_legacy.so
 vendor/lib64/libqmiextservices.so
 vendor/lib64/libqmiservices.so
-vendor/lib64/libqrtr.so
 vendor/lib64/libqsocket.so
 vendor/lib64/libsmemlog.so
 vendor/lib64/libsystem_health_mon.so
@@ -1055,7 +955,6 @@ vendor/etc/ssg/ta_config.json
 vendor/etc/ssg/tz_whitelist.json
 vendor/lib64/libminkdescriptor.so
 vendor/lib64/libnative-api.so
-vendor/lib64/libqcbor.so
 
 # Sensors - MIUI
 vendor/bin/init.qcom.sensors.sh|5b38688acaf5f4a2e973b72d236a06498703a023
@@ -1068,22 +967,6 @@ vendor/etc/elliptic_sensor.xml|c821cade58e0f10972fc5c81c24044db71e0619a
 vendor/etc/sensor_diag.cfg|a90a807b6e1a0ff524e13b0cc0e05a1a2845d48d
 vendor/lib/rfsa/adsp/libsns_device_mode_skel.so|733a5b8861bb6eb1285bb8982992531c94800997
 vendor/lib/rfsa/adsp/libsns_low_lat_stream_skel.so|c30bb30eecf968e02f72c055d3cc13a7f769644f
-vendor/lib/libsensorcal.so|32ef4769d60557860b8326fed840407330a28a59
-vendor/lib/libsensorslog.so|4782abfc78fcd4102045ca88f973c1a5e9ce5fa7
-vendor/lib/libsns_device_mode_stub.so|dc84dc2253df4ec33047968fb33a92533accdf12
-vendor/lib/libsns_fastRPC_util.so|bcd78acdc0ae21b60eae46fac8fa16341537a649
-vendor/lib/libsns_low_lat_stream_stub.so|df5483ec1c27fbd98503dd67c9a2f782e5830748
-vendor/lib/libsns_registry_skel.so|f8432fd768cc0b8797131a6590bea81c91467cf7
-vendor/lib/libsnsapi.so|a9136895c5de6f7363658615d66ccdd608ab5962
-vendor/lib/libsnsdiaglog.so|d5228e5aa306636c72ffa8d49725b8442a34470b
-vendor/lib/libssc.so|a007eda53b95539c0183dc2897ca95c781a2909d
-vendor/lib/libssc_default_listener.so|e3a7b4fe1b4e31afb6fffcf8fd2babf60db1e894
-vendor/lib/libssccalapi.so|63dd63d32fb993d2ef9f4e3ac3ecf5bc8c435afc
-vendor/lib/libultrasound.so|9e286dc7fc5efe7c9916ef2a9cf5611d2486c3f2
-vendor/lib/sensors.mius.proximity.so|22b94659a3ebb751aafbebe4e12059da9e32bf8f
-vendor/lib/sensors.ssc.so|2a6f83c35864fe61a25659ebe2d888969b292678
-vendor/lib64/rfsa/adsp/libsns_device_mode_skel.so|733a5b8861bb6eb1285bb8982992531c94800997
-vendor/lib64/rfsa/adsp/libsns_low_lat_stream_skel.so|c30bb30eecf968e02f72c055d3cc13a7f769644f
 vendor/lib64/libnotifyaudiohal.so|c6d53e28c977f92e974b85dfb532734b42d44231
 vendor/lib64/libsensorcal.so|6c7275b7fd887475e3e090284ab56d115ea1ecc1
 vendor/lib64/libsensorslog.so|8df3d0d6ccf65d88b98788fd65bd1918c022a264
@@ -1104,7 +987,6 @@ vendor/lib64/sensors.ssc.so|5eade1294d1d60e5f3ab404ab4c57c35082b48d5
 # Sensor (calibrate) - MIUI
 vendor/bin/hw/vendor.qti.hardware.sensorscalibrate@1.0-service|9712de3546d87ef2b3a96e8a745de5afa441c400
 vendor/etc/init/vendor.qti.hardware.sensorscalibrate@1.0-service.rc|449c88778d880c0d47cc4d651fc60c4c424c1a3f
-vendor/etc/permissions/vendor-qti-hardware-sensorscalibrate.xml|f4884c1776c9f77c24bfce853fe22627ea4b7f79
 vendor/lib64/hw/vendor.qti.hardware.sensorscalibrate@1.0-impl.so|c8a5dcbb7a892bffda1a9cc398dd0280a7422371
 vendor/lib64/vendor.qti.hardware.sensorscalibrate@1.0.so|c94b40c8db796fa012a14d1d5fa6f9b20ee64172
 
@@ -1149,9 +1031,9 @@ vendor/etc/sensors/config/sns_tilt_to_wake.json|e2a231e804a95ce519d3af0cd3a8fb0d
 vendor/etc/sensors/config/sx932x_0.json|f4597bfa2ea8757a348018e93767cd387480b2e5
 vendor/etc/sensors/config/sx932x_1.json|bff36d0de29c6af4ce880be82e455856260e6fef
 vendor/etc/sensors/config/tcs3701.json|9b921156bfa4d26c866b09934798b7e0f6bd4bb8
+vendor/etc/sensors/calibratedCheck.json|4a0cacc9b35634623a36484e6312e64b8319ac06
 vendor/etc/sensors/judge_calibrated.json|0df927c4766c3a54267bab638787d564c17f8d85
 vendor/etc/sensors/sns_reg_config|cea8c9f674c039de77bb7f743d8a9122ab8b6897
-vendor/etc/sensors/calibratedCheck.json|4a0cacc9b35634623a36484e6312e64b8319ac06
 
 # SecureMSM (GPQESE)
 vendor/bin/hw/vendor.qti.esepowermanager@1.1-service
@@ -1166,8 +1048,6 @@ vendor/lib64/vendor.qti.esepowermanager@1.1.so
 # SecureMSM (SECDISP)
 vendor/lib64/libSecureUILib.so
 vendor/lib64/libStDrvInt.so
-vendor/lib64/libsecureui.so
-vendor/lib64/libsecureui_svcsock.so
 vendor/lib64/libsi.so
 vendor/lib64/vendor.qti.hardware.qdutils_disp@1.0.so
 
@@ -1196,11 +1076,7 @@ vendor/lib64/hw/vendor.qti.hardware.soter@1.0-impl.so
 vendor/lib64/vendor.qti.hardware.soter@1.0.so
 
 # SS Restart
-vendor/bin/ssr_diag
 vendor/bin/ssr_setup
-vendor/bin/subsystem_ramdump
-vendor/lib/libsubsystem_control.so
-vendor/lib64/libsubsystem_control.so
 
 # TFTP
 vendor/bin/tftp_server
@@ -1226,16 +1102,13 @@ vendor/etc/thermal-camera.conf|65d8cb243cac4285a10487d4b43e97914a4f82f9
 vendor/etc/thermal-class0.conf|5daf08f2488b6bf05d24023eff507ac6624facb3
 vendor/etc/thermal-engine.conf|c6c9312b7c7b52926cf7d0fc9bff933d90967100
 vendor/etc/thermal-india-class0.conf|7cc57c1e625297c600c840a08e6e7d2d0af81817
-vendor/etc/thermal-india-mgame.conf|fda5b9fef4e24146ba430241eb100919f660c376
 vendor/etc/thermal-india-normal.conf|3ace701339810d147a2abf8cb8e77c1651c107c8
 vendor/etc/thermal-india-per-class0.conf|4afc406b1f711414383a959322480583ebad56f3
 vendor/etc/thermal-india-per-normal.conf|f69e1108242ce282fbd25fccaad2895779ea6bb0
 vendor/etc/thermal-india-per-video.conf|88e30798102a67dcae90a8ad433f1f829cfecd88
-vendor/etc/thermal-india-tgame.conf|085bf32b1cbe16516ee0adf4ac4f6e57ef4840a4
 vendor/etc/thermal-india-video.conf|bb15b873112319704323f219b382bd18b1996b56
 vendor/etc/thermal-map-india.conf|fdee294162e90ba8c7b60c8aac3d3f3ac84f2fef
 vendor/etc/thermal-map.conf|0d6bddbb6ed8944465472bba53ba6f1ed6b53645
-vendor/etc/thermal-mgame.conf|2efef4d4ea8342eed5454e08c275e10517a3588e
 vendor/etc/thermal-navigation.conf|2c850b748b86b64102fe30a74af85a03ad6f1a5f
 vendor/etc/thermal-nolimits.conf|10a6903a0e56f052a9aed7225aeee293f9f27e91
 vendor/etc/thermal-normal.conf|0de8d4026d3df0461dde2770db382269b5d8c33c
@@ -1246,7 +1119,6 @@ vendor/etc/thermal-per-normal.conf|58e79c5c1a8e65c5e0a8d6bbe83a941ef5610638
 vendor/etc/thermal-per-video.conf|fb327fd5680fe2cb6fa1c7d2ec3bb82460226428
 vendor/etc/thermal-phone.conf|4416e47ece2357a4b52899f92939379eb9d7257e
 vendor/etc/thermal-region-map.conf|8a60e0d66e519e0301c3192a5c1740e21f2170bf
-vendor/etc/thermal-tgame.conf|12e027e73302ea4400b942670cae88b4b20e4850
 vendor/etc/thermal-video.conf|e2deb3c64d2239f27f0530a7eef4631451865af5
 vendor/etc/thermald-devices.conf|12d33ce9c3420572a07419d3317083eafe5b82e8
 -vendor/lib/libthermalclient.so|6ed686c6c39546a7bf532767f6d87808a42b1176
@@ -1260,6 +1132,7 @@ vendor/lib64/libtime_genoff.so
 
 # UBWC
 vendor/lib/libstreamparser.so
+vendor/lib/libvideoutils.so
 
 # Vibrator - MIUI
 vendor/firmware/0_click_P_RTP.bin|da39a3ee5e6b4b0d3255bfef95601890afd80709
@@ -1282,6 +1155,9 @@ vendor/lib/libvpphvx.so
 vendor/lib/libvppimmotion.so
 vendor/lib/libvpplibrary.so
 vendor/lib/libvpptestutils.so
+vendor/lib/vendor.qti.hardware.vpp@1.1.so
+vendor/lib/vendor.qti.hardware.vpp@1.2.so
+vendor/lib/vendor.qti.hardware.vpp@1.3.so
 vendor/lib64/libOmxVpp.so
 vendor/lib64/libvppclient.so
 vendor/lib64/libvpphcp.so
@@ -1289,13 +1165,16 @@ vendor/lib64/libvpphvx.so
 vendor/lib64/libvppimmotion.so
 vendor/lib64/libvpplibrary.so
 vendor/lib64/libvpptestutils.so
+vendor/lib64/vendor.qti.hardware.vpp@1.1.so
+vendor/lib64/vendor.qti.hardware.vpp@1.2.so
+vendor/lib64/vendor.qti.hardware.vpp@1.3.so
 
 # Widevine - MIUI
 vendor/bin/hw/android.hardware.drm@1.3-service.widevine|07b8d21fb76abd377428a6d1b52d6aadfc5892a1
 vendor/etc/init/android.hardware.drm@1.3-service.widevine.rc|a9ce64f68c86725c06c1b1429e90b04ff96ebf60
 vendor/etc/vintf/manifest/manifest_android.hardware.drm@1.3-service.widevine.xml|ebebcf8f367641480cf7d512fc06e6ab777527be
-vendor/lib64/mediadrm/libwvdrmengine.so|95c3f9ca4ac8a3e73c9cbd260ca8fb1ccc3a056b
-vendor/lib64/libwvhidl.so|18e91248969b2f63f1c09c4d244672e67c293b49
+vendor/lib64/mediadrm/libwvdrmengine.so|1c1b9df47f212b2472a34951ffe1368db30a27be
+vendor/lib64/libwvhidl.so|600c1bf03c224fd35c6282130fc6f645c4846db9
 vendor/lib64/libwvkeybox.so|ebf6143969035d82efc007681e126a38420ac9a7
 
 # WiFi - MIUI

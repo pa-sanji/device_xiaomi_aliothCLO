@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# A17 ION policy. This kernel (4.19) still exposes /dev/ion, but A17 no longer
-# ships the generic ION rules by default. Without them hwservicemanager/vold
-# fail early and init falls back to recovery, looping on the OEM logo.
-include vendor/aospa/sepolicy/libion/sepolicy.mk
-
 # QCOM Sepolicy
+SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
+    device/xiaomi/alioth/sepolicy/private/qcom
+
 BOARD_VENDOR_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/vendor/qcom
 
@@ -29,7 +27,8 @@ SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/private/xiaomi/sensors
 
 SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += \
-    device/xiaomi/alioth/sepolicy/public/xiaomi/devicesettings
+    device/xiaomi/alioth/sepolicy/public/xiaomi/devicesettings \
+    device/xiaomi/alioth/sepolicy/public/xiaomi/touchfeature
 
 BOARD_VENDOR_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/audio \
@@ -38,14 +37,15 @@ BOARD_VENDOR_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/bootctl \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/camera \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/display \
-    device/xiaomi/alioth/sepolicy/vendor/xiaomi/dolby \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/fingerprint \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/ir \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/modem \
+    device/xiaomi/alioth/sepolicy/vendor/xiaomi/peripheralmanager \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/power_supply \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/sensors \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/thermald \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/touch \
+    device/xiaomi/alioth/sepolicy/vendor/xiaomi/touchfeature \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/usb \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/vibrator \
     device/xiaomi/alioth/sepolicy/vendor/xiaomi/wireless \

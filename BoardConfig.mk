@@ -13,6 +13,7 @@
 # limitations under the License.
 
 DEVICE_PATH := device/xiaomi/alioth
+HARDWARE_PATH := hardware/xiaomi
 
 # A/B
 AB_OTA_UPDATER := true
@@ -61,6 +62,9 @@ TARGET_BOARD_INFO_FILE := $(DEVICE_PATH)/board-info.txt
 # Bootloader
 TARGET_BOOTLOADER_BOARD_NAME := kona
 
+# Camera
+TARGET_CAMERA_SERVICE_EXT_LIB := //$(DEVICE_PATH):libcameraservice_extension.xiaomi_kona
+
 # DTB
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_BOOT_HEADER_VERSION := 3
@@ -79,7 +83,8 @@ TARGET_TAP_TO_WAKE_NODE := "/sys/touchpanel/double_tap"
 
 # HIDL
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
-    $(DEVICE_PATH)/configs/vintf/xiaomi_vendor_framework_compatibility_matrix.xml
+    $(DEVICE_PATH)/configs/vintf/xiaomi_vendor_framework_compatibility_matrix.xml \
+    $(HARDWARE_PATH)/vintf/xiaomi_framework_compatibility_matrix.xml
 
 DEVICE_MANIFEST_FILE += \
     $(DEVICE_PATH)/configs/vintf/manifest.xml \
@@ -100,17 +105,13 @@ TARGET_INIT_VENDOR_LIB := //$(DEVICE_PATH):libinit_alioth
 
 # Kernel
 BOARD_KERNEL_CMDLINE := \
-    androidboot.console=ttyMSM0 \
     androidboot.hardware=qcom \
     androidboot.init_fatal_reboot_target=recovery \
-    androidboot.memcg=1 \
     androidboot.usbcontroller=a600000.dwc3 \
     cgroup.memory=nokmem,nosocket \
-    console=ttyMSM0,115200n8 \
     earlycon=msm_geni_serial,0xa90000 \
     loop.max_part=7 \
     lpm_levels.sleep_disabled=1 \
-    msm_rtb.filter=0x237 \
     reboot=panic_warm \
     service_locator.enable=1 \
     swiotlb=2048
@@ -119,6 +120,10 @@ BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 4096
 BOARD_RAMDISK_OFFSET := 0x01000000
 BOARD_RAMDISK_USE_LZ4 := true
+
+TARGET_KERNEL_VERSION := 4.19
+TARGET_KERNEL_SOURCE := kernel/msm-4.19
+TARGET_KERNEL_CONFIG := alioth_defconfig
 
 KERNEL_DEFCONFIG := alioth_defconfig
 
@@ -149,16 +154,11 @@ TARGET_COPY_OUT_PRODUCT := product
 TARGET_COPY_OUT_SYSTEM_EXT := system_ext
 TARGET_COPY_OUT_VENDOR := vendor
 
-# Properties
-TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
-TARGET_PRODUCT_PROP += $(DEVICE_PATH)/product.prop
-
 # Recovery
 BOARD_INCLUDE_RECOVERY_DTBO := true
 BOARD_USES_RECOVERY_AS_BOOT := true
 TARGET_NO_RECOVERY := true
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/init/fstab.qcom
-TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_RECOVERY_UI_MARGIN_HEIGHT := 75
 TARGET_USERIMAGES_USE_F2FS := true
 

@@ -1,0 +1,2 @@
+# Aware
+ro.vendor.aware_available    u:object_r:vendor_aware_available_prop:s0
