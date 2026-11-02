@@ -34,22 +34,35 @@ on post-fs-data
     mkdir /data/vendor/thermal/config 0771 root system
 
 on boot
+    write /sys/touchpanel/double_tap 1
     chown system system /sys/touchpanel/double_tap
+    chmod 0660 /sys/touchpanel/double_tap
     chown system system /sys/class/touch/touch_dev/palm_sensor
     chown system system /sys/class/thermal/thermal_message/sconfig
     copy  /vendor/etc/tunings.txt /mnt/vendor/persist/vpp/tunings.txt
     mkdir /mnt/vendor/persist/camera 0755 system cameraserver
     write /sys/block/sda/queue/wbt_lat_usec 75000
 
+    # default country code
+    setprop ro.boot.wificountrycode 00
+
     # Lineage Health
     chmod 0660 /sys/class/power_supply/battery/input_suspend
     chown system system /sys/class/power_supply/battery/input_suspend
+
+    # Torch
+    chown cameraserver cameraserver /sys/class/leds/led:switch_0/brightness
+    chown cameraserver cameraserver /sys/class/leds/led:torch_0/brightness
+    chown cameraserver cameraserver /sys/class/leds/led:torch_1/brightness
 
 on property:vendor.post_boot.parsed=1
     # configure input boost settings
     write /sys/devices/system/cpu/cpu_boost/input_boost_freq "0:1344000"
     write /sys/devices/system/cpu/cpu_boost/powerkey_input_boost_freq "0:1804800 1:0 2:0 3:0 4:2419200 5:0 6:0 7:3187200"
     write /sys/devices/system/cpu/cpu_boost/powerkey_input_boost_ms 400
+
+    # Disable native stats collection service
+    stop statsd
 
 on charger
     mkdir /mnt/vendor/persist
@@ -64,9 +77,12 @@ service vendor.audio-hal /vendor/bin/hw/android.hardware.audio.service
     user audioserver
     # media gid needed for /dev/fm (radio) and for /data/misc/media (tee)
     group audio camera drmrpc inet media mediadrm net_bt net_bt_admin net_bw_acct oem_2901 wakelock
-    capabilities BLOCK_SUSPEND
+    capabilities BLOCK_SUSPEND SYS_NICE
+    # setting RLIMIT_RTPRIO allows binder RT priority inheritance
+    rlimit rtprio 10 10
     ioprio rt 4
     task_profiles ProcessCapacityHigh HighPerformance
+    onrestart restart audioserver
     socket audio_hw_socket seqpacket 0666 system system
     onrestart restart audioserver
 
@@ -86,15 +102,32 @@ service vendor.btmac-sh /vendor/bin/init.mi.btmac.sh
     oneshot
     disabled
 
-service nqnfc_2_0_hal_service /vendor/bin/hw/vendor.nxp.hardware.nfc@2.0-service
+# NFC
+service qti_esepowermanager_service_1_1 /vendor/bin/hw/vendor.qti.esepowermanager@1.1-service
     override
     class hal
+    user system
+    group nfc system
+    disabled
+
+service secureelement-hal_1_2 /vendor/bin/hw/vendor.qti.secure_element@1.2-service
+    override
+    class hal
+    user system
+    group system
+    disabled
+
+service vendor.nfc_hal_service /vendor/bin/hw/android.hardware.nfc-service.nxp
+    override
+    class early_hal
     user nfc
     group nfc
     disabled
 
 on boot && property:ro.boot.product.hardware.sku=pro
-    enable nqnfc_2_0_hal_service
+    enable qti_esepowermanager_service_1_1
+    enable secureelement-hal_1_2
+    enable vendor.nfc_hal_service
 
 on property:ro.boot.hwlevel=*
     setprop ro.boot.hardware.revision ${ro.boot.hwc}_${ro.boot.hwlevel}_${ro.boot.hwversion}
