@@ -258,7 +258,6 @@ PRODUCT_PACKAGES += \
     fstab.qcom \
     init.alioth.rc \
     init.mi.btmac.sh \
-    init.mi.usb.sh \
     init.qti.dcvs.sh \
     init.target.rc \
     ueventd.alioth.rc
@@ -447,6 +446,12 @@ PRODUCT_PACKAGES += \
     update_engine_sideload \
     update_verifier
 
+# USB
+# The 4.19 QCOM USB product makefile only enables the AIDL gadget HAL for
+# newer kernels. A17 needs it; without it adb/functionfs falls back to the
+# legacy configfs rules and never enumerates.
+PRODUCT_HAS_GADGET_HAL := true
+
 # Vendor
 $(call inherit-product, vendor/xiaomi/alioth/alioth-vendor.mk)
 
@@ -456,6 +461,17 @@ PRODUCT_COPY_FILES += \
 
 # Vibrator
 $(call inherit-product, hardware/xiaomi/aidl/vibrator/vibrator-vendor-product.mk)
+
+# Persistent logcat: keep a rotating logcat in /data/misc/logd so a failed boot
+# can be diagnosed from recovery (adb pull /data/misc/logd). Small footprint.
+# NOTE: must be PRODUCT_SYSTEM_PROPERTIES — PRODUCT_PROPERTY_OVERRIDES lands in
+# /vendor/build.prop on this tree, where vendor_init lacks set permission on
+# logpersistd_logging_prop (system_public_prop).
+PRODUCT_SYSTEM_PROPERTIES += \
+    persist.logd.logpersistd=logcatd \
+    persist.logd.logpersistd.size=16 \
+    persist.logd.logpersistd.rotate_kbytes=2048 \
+    persist.logd.logpersistd.buffer=all
 
 # VNDK
 PRODUCT_PACKAGES += \
