@@ -16,19 +16,8 @@
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/private/qcom
 
-# Drop the AOSPA test sepolicy dirs. They are added for userdebug/eng and
-# duplicate production labels (vendor.qti.diaghal::Idiag). A duplicate key
-# makes selabel_open() fail, so hwservicemanager aborts with
-# "Failed to acquire SELinux handle" and vold never mounts /data.
-BOARD_VENDOR_SEPOLICY_DIRS := $(filter-out \
-    %/generic/vendor/test \
-    %/qva/vendor/test \
-    %/qva/vendor/test/sysmonapp, \
-    $(BOARD_VENDOR_SEPOLICY_DIRS))
-
 BOARD_VENDOR_SEPOLICY_DIRS += \
-    device/xiaomi/alioth/sepolicy/vendor/qcom \
-    device/xiaomi/alioth/sepolicy/vendor/qcom/kona
+    device/xiaomi/alioth/sepolicy/vendor/qcom
 
 # Xiaomi Sepolicy
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
