@@ -83,13 +83,24 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libaudioroute-v34
 
+# Source-built QTI primary HAL, matching the working kaffu sm8250 reference.
+# audio.primary.kona is already pulled in through
+# device/qcom/common/vendor/audio/qti-audio.mk -> configs/kona/kona.mk; keep the
+# HIDL service and its impls explicit so the 32-bit legacy HAL wrapper is always
+# packaged at the same path init expects.
+PRODUCT_PACKAGES += \
+    android.hardware.audio@6.0-impl \
+    android.hardware.audio.effect@6.0-impl \
+    android.hardware.audio.service \
+    audio.primary.kona
+
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.audio.delta.refresh=true \
     persist.vendor.audio.misound.disable=true \
     persist.vendor.audio.ring.filter.mask=0 \
     ro.audio.monitorRotation=true \
     ro.config.vc_call_vol_steps=11 \
-    ro.hardware.audio.primary=alioth \
+    ro.hardware.audio.primary=kona \
     ro.vendor.audio.enhance.support=false \
     ro.vendor.audio.gain.support=true \
     ro.vendor.audio.karaok.support=true \
@@ -292,12 +303,12 @@ PRODUCT_PACKAGES += \
     fastbootd
 
 # Fingerprint
-# AIDL, matching PocoF3Releases device_xiaomi_sm8250-common/kona.mk:201.
-# config_biometric_sensors is left empty in the AliothFrameworks overlay so
-# AuthService picks the AIDL path; shipping the HIDL @2.3 service instead only
-# makes the framework ask for a @2.1 HIDL interface that never answers.
+# HIDL @2.3, matching PocoF3Releases device_xiaomi_sm8250-common/kona.mk:209
+# and the working kaffu sm8250 reference. The MIUI blob is @2.1 (FPC), and the
+# @2.3 service is minor-version compatible, so it serves the @2.1 interface the
+# framework asks for when config_biometric_sensors is non-empty.
 PRODUCT_PACKAGES += \
-    android.hardware.biometrics.fingerprint-service.xiaomi
+    android.hardware.biometrics.fingerprint@2.3-service.xiaomi
 
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.fingerprint.sensor_location=1080|965|115|local:4630946736638489729 \
