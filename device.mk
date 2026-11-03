@@ -86,11 +86,19 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libaudioroute-v34
 
-# Source-built QTI primary HAL, matching the working kaffu sm8250 reference.
-# audio.primary.kona is already pulled in through
-# device/qcom/common/vendor/audio/qti-audio.mk -> configs/kona/kona.mk; keep the
-# HIDL service and its impls explicit so the 32-bit legacy HAL wrapper is always
-# packaged at the same path init expects.
+# Primary HAL selection: the 32-bit android.hardware.audio.service loads
+# audio.primary.<ro.hardware.audio.primary>.so from /vendor/lib/hw.
+#
+# "alioth" selects the MIUI prebuilt vendor blob (audio.primary.alioth.so),
+# which is matched to the 4.19 kernel, the vauxite ADSP firmware and the Forte
+# ACDB data. This mirrors PocoF3Releases/vendor_xiaomi_alioth (aosp-17), whose
+# working release ships the MIUI prebuilt audio.primary.kona.so with
+# prefer:true over the source module.
+#
+# The source-built "kona" HAL from aospa-pipa/android_hardware_qcom_audio
+# (calcite-865) is a pipa-generation HAL: it loads and routes fine but every
+# playback pcm_prepare fails at the ADSP (1426 failures in the 2026-11-03
+# bootlogs, app_type 69943 topology 0x10c68), so no sound is produced.
 PRODUCT_PACKAGES += \
     android.hardware.audio@6.0-impl \
     android.hardware.audio.effect@6.0-impl \
@@ -103,7 +111,7 @@ PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.audio.ring.filter.mask=0 \
     ro.audio.monitorRotation=true \
     ro.config.vc_call_vol_steps=11 \
-    ro.hardware.audio.primary=kona \
+    ro.hardware.audio.primary=alioth \
     ro.vendor.audio.enhance.support=false \
     ro.vendor.audio.gain.support=true \
     ro.vendor.audio.karaok.support=true \
