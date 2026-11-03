@@ -17,7 +17,8 @@ SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
     device/xiaomi/alioth/sepolicy/private/qcom
 
 BOARD_VENDOR_SEPOLICY_DIRS += \
-    device/xiaomi/alioth/sepolicy/vendor/qcom
+    device/xiaomi/alioth/sepolicy/vendor/qcom \
+    device/xiaomi/alioth/sepolicy/vendor/qcom/kona
 
 # Xiaomi Sepolicy
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
