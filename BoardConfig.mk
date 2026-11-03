@@ -171,3 +171,11 @@ TARGET_USERIMAGES_USE_F2FS := true
 
 # SEPolicy
 -include device/xiaomi/alioth/sepolicy/alioth-sepolicy.mk
+
+# Debug tools (logger) sepolicy
+# hardware/samsung-ext/interfaces/sepolicy/SEPolicy.mk also adds its vendor dir,
+# but that dir labels a Lineage touch HAL type this tree does not define
+# (hal_lineage_touch_default_exec). The logger lives in the private dir, so add
+# only private/public.
+SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += hardware/samsung-ext/interfaces/sepolicy/private
+SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += hardware/samsung-ext/interfaces/sepolicy/public
