@@ -105,6 +105,15 @@ PRODUCT_PACKAGES += \
     android.hardware.audio.service \
     audio.primary.kona
 
+# The MIUI prebuilt primary HAL (audio.primary.alioth.so) was built against the
+# pre-A17 audio_port_config ABI, which has no speaker_layout_channel_mask field
+# in audio_port_config_device_ext. Compile the vendor-side HIDL audio glue
+# without the field so the structs exchanged with the legacy HAL match; without
+# this, AudioService startup never returns from its first port-config exchange
+# with the HAL and the system server watchdogs in a loop (all cycles in the
+# 2026-11-04 bootlogs stop at SystemServerTiming: StartAudioService).
+$(call soong_config_set_bool,android_hardware_audio,skip_speaker_layout_channel_mask_field,true)
+
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.audio.delta.refresh=true \
     persist.vendor.audio.misound.disable=true \
