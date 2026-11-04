@@ -464,16 +464,14 @@
          AuthService.registerFingerprintSensors():
              new FingerprintSensorConfigurations(
                      !(hidlConfigStrings != null && hidlConfigStrings.length > 0))
-         A non-empty array makes that flag false and selects the HIDL path,
-         where HidlToAidlSensorAdapter resolves
-         android.hardware.biometrics.fingerprint@2.1::IBiometricsFingerprint.
-         That is served by the @2.3 service from hardware/xiaomi, matching the
-         working kaffu sm8250 reference. The generic kona RRO also adds a face
-         sensor (1:8:15) that alioth does not have, so override it with the
-         fingerprint sensor only. -->
-    <string-array name="config_biometric_sensors" translatable="false">
-        <item>0:2:15</item> <!-- ID0:Fingerprint:Strong -->
-    </string-array>
+         An empty array keeps hidlConfigStrings empty, so no HIDL sensors are
+         registered; the AIDL instance declared by the
+         android.hardware.biometrics.fingerprint-service.xiaomi VINTF fragment
+         is picked up through FingerprintService.getDeclaredInstances(), the
+         same way PocoF3Releases runs it. A non-empty array would register the
+         HIDL path (HidlToAidlSensorAdapter, @2.1 interface), which the A17
+         build no longer ships - its @2.3 service SIGSEGVs at startup. -->
+    <string-array name="config_biometric_sensors" translatable="false" />
 
     <!-- Whether device supports double tap to wake -->
     <bool name="config_supportDoubleTapWake">true</bool>
