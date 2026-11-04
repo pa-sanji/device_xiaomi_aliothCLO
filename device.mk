@@ -130,12 +130,23 @@ PRODUCT_SYSTEM_PROPERTIES += \
     persist.bluetooth.sbc_hd_higher_bitrate=1 \
     persist.vendor.audio_hal.dsp_bit_width_enforce_mode=24
 
+# SSREC is reported unsupported on alioth ("surround sound recording is not
+# supported"), and the source-built libssrec.so disagrees with the MIUI HAL
+# blob on struct stream_in layout:
+#   stock MIUI lib: channel_mask@0xb0, device_list@0xa8
+#   our CAF lib:    channel_mask@0xb4, device_list@0xac
+# The blob passes &in->device_list at 0xa8, so the lib walks a garbage,
+# self-linked pointer and adev_open_input_stream never returns. That blocks
+# the HAL, and the AudioFlinger timecheck aborts audioserver on camera
+# recording (CAMCORDER / BACK_MIC). Disable the feature so the blob never
+# loads the mismatched library.
 PRODUCT_ODM_PROPERTIES += \
     aaudio.mmap_policy=1 \
     ro.vendor.audio.sdk.fluencetype=fluence \
     vendor.audio.adm.buffering.ms=6 \
     vendor.audio.feature.dynamic_ecns.enable=false \
     vendor.audio.feature.spkr_prot.enable=false \
+    vendor.audio.feature.ssrec.enable=false \
     vendor.audio.hal.output.suspend.supported=false \
     vendor.audio.offload.multiple.enabled=true \
     vendor.audio.offload.track.enable=false \
