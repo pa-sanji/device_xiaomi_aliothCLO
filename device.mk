@@ -60,73 +60,65 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.device_id_attestation.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.device_id_attestation.xml
 
 # Audio
-PRODUCT_PACKAGES += \
-    libqcompostprocbundle \
-    libqcomvisualizer \
-    libqcomvoiceprocessing
+$(call soong_config_set,tinycompress,enable_extended_compress_format,true)
+$(call soong_config_set,tinycompress,loop_compress_read,true)
 
-# The prebuilt vendor audio HAL (vendor/lib/hw/audio.primary.alioth.so) has a
-# hard DT_NEEDED on libaudioroute-v34.so, the VNDK-34 flavoured audioroute:
-#
-#   readelf -d .../audio.primary.alioth.so | grep audioroute
-#       [NEEDED] libaudioroute-v34.so
-#       [NEEDED] libaudioroute_ext.so
-#
-# hardware/lineage/compat provides exactly that module (Android.bp:93,
-# prebuilt vndk/v34/{arm,arm64}), which is the same shim LineageOS alioth
-# relies on in its extract-files.py:
-#
-#   .replace_needed('libaudioroute.so', 'libaudioroute-v34.so')
-#
-# Without it the linker cannot load audio.primary.alioth.so, so AudioFlinger
-# never gets a primary module and every listAudioPorts call fails - 2012 of
-# them in penguin_boot2.txt, with no pcm_open and no audio.primary logging at
-# all. It also has to be packaged: nothing in the tree pulls it in
-# automatically.
-PRODUCT_PACKAGES += \
-    libaudioroute-v34
-
-# Primary HAL selection: the 32-bit android.hardware.audio.service loads
-# audio.primary.<ro.hardware.audio.primary>.so from /vendor/lib/hw.
-#
-# "alioth" selects the MIUI prebuilt vendor blob (audio.primary.alioth.so),
-# which is matched to the 4.19 kernel, the vauxite ADSP firmware and the Forte
-# ACDB data. This mirrors PocoF3Releases/vendor_xiaomi_alioth (aosp-17), whose
-# working release ships the MIUI prebuilt audio.primary.kona.so with
-# prefer:true over the source module.
-#
-# The source-built "kona" HAL from aospa-pipa/android_hardware_qcom_audio
-# (calcite-865) is a pipa-generation HAL: it loads and routes fine but every
-# playback pcm_prepare fails at the ADSP (1426 failures in the 2026-11-03
-# bootlogs, app_type 69943 topology 0x10c68), so no sound is produced.
+# Primary HAL: built from source from the LineageOS CAF sm8250 repo
+# (hardware/qcom-caf/sm8250/audio, lineage-24.0-caf-sm8250), the HAL generation
+# LineageOS alioth and kaffu run on sm8250. It is matched to the kona ADSP
+# images and the vauxite/PocoF3Releases platform configs, unlike:
+#  - the pipa-generation HAL (aospa-pipa calcite-865, build #40): boots, but
+#    every playback pcm_prepare failed at the ADSP (1426 failures, app_type
+#    69943 topology 0x10c68), so no sound;
+#  - the MIUI prebuilt blob (audio.primary.alioth.so, builds #43-#45): the
+#    first boot-time input probe (adev_open_input_stream io_handle 14) never
+#    returned on the E404 kernel, so the system server watchdog-looped at
+#    StartAudioService regardless of properties or configuration.
 PRODUCT_PACKAGES += \
     android.hardware.audio@6.0-impl \
     android.hardware.audio.effect@6.0-impl \
     android.hardware.audio.service \
-    audio.primary.kona
+    android.hardware.soundtrigger@2.3-impl \
+    libaudioroute-v34
 
-# The MIUI prebuilt primary HAL (audio.primary.alioth.so) was built against the
-# pre-A17 audio_port_config ABI, which has no speaker_layout_channel_mask field
-# in audio_port_config_device_ext. Compile the vendor-side HIDL audio glue
-# without the field so the structs exchanged with the legacy HAL match; without
-# this, AudioService startup never returns from its first port-config exchange
-# with the HAL and the system server watchdogs in a loop (all cycles in the
-# 2026-11-04 bootlogs stop at SystemServerTiming: StartAudioService).
+PRODUCT_PACKAGES += \
+    audio.primary.kona \
+    audio.r_submix.default \
+    audio.usbv2.default
+
+PRODUCT_PACKAGES += \
+    liba2dpoffload \
+    libaudiopreprocessing \
+    libbatterylistener \
+    libbundlewrapper \
+    libcomprcapture \
+    libdownmix \
+    libdynproc \
+    libeffectproxy \
+    libexthwplugin \
+    libhdmiedid \
+    libhfp \
+    libldnhncr \
+    libqcompostprocbundle \
+    libqcomvisualizer \
+    libqcomvoiceprocessing \
+    libreverbwrapper \
+    libsndmonitor \
+    libspkrprot \
+    libvisualizer \
+    libvolumelistener
+
+# Compile the vendor-side HIDL audio glue without the Android 17
+# speaker_layout_channel_mask field of audio_port_config_device_ext so the
+# exchanged audio_port_config structs stay compatible with the CAF HAL and
+# the prebuilt sound trigger blob, neither of which knows the field.
 $(call soong_config_set_bool,android_hardware_audio,skip_speaker_layout_channel_mask_field,true)
 
-# Keep the vendor property set for the prebuilt primary HAL aligned with the
-# PocoF3Releases aosp-17 recipe, which runs the identical audio.primary blob
-# without any of the MIUI feature properties (karaok, us proximity, zoom,
-# scenario, misound, ...). Those were inherited from the pipa port where they
-# matched pipa's own HAL; on the alioth blob they enable MIUI code paths that
-# hook adev_open_input_stream (karaoke fastcapture, ultrasound proximity,
-# fcsam audio zoom), and with them set the first boot-time input probe never
-# returns - the audio service's last log in the 2026-11-04 bootlogs (build
-# #44) is "adev_open_input_stream: enter ... io_handle(14)" and the system
-# server then watchdogs in a loop at StartAudioService.
+# The 32-bit android.hardware.audio.service loads
+# audio.primary.<ro.hardware.audio.primary>.so from /vendor/lib/hw.
 PRODUCT_VENDOR_PROPERTIES += \
     ro.config.vc_call_vol_steps=11 \
-    ro.hardware.audio.primary=alioth
+    ro.hardware.audio.primary=kona
 
 PRODUCT_SYSTEM_PROPERTIES += \
     ro.audio.usb.period_us=20375 \
@@ -153,7 +145,12 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/mixer_paths_overlay_static.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths_overlay_static.xml \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio/audio_policy_configuration.xml \
     $(LOCAL_PATH)/configs/audio/audio_effects.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.xml \
-    $(LOCAL_PATH)/configs/audio/audio_io_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_io_policy.conf
+    $(LOCAL_PATH)/configs/audio/audio_io_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_io_policy.conf \
+    frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration.xml \
+    frameworks/av/services/audiopolicy/config/default_volume_tables.xml:$(TARGET_COPY_OUT_VENDOR)/etc/default_volume_tables.xml \
+    frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml \
+    frameworks/native/data/etc/android.hardware.audio.low_latency.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.audio.low_latency.xml \
+    frameworks/native/data/etc/android.hardware.audio.pro.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.audio.pro.xml
 
 # Battery
 PRODUCT_SYSTEM_PROPERTIES += \
@@ -553,10 +550,13 @@ PRODUCT_PACKAGES += \
     libjson
 
 # QTI
+# Note: the "audio" component is deliberately excluded. It would pull in
+# vendor/qcom/opensource/audio-hal/primary-hal (removed from the manifest in
+# favour of hardware/qcom-caf/sm8250/audio) and duplicate the audio packages
+# and policy configuration copies defined above.
 TARGET_COMMON_QTI_COMPONENTS := \
     adreno \
     alarm \
-    audio \
     av \
     bt \
     charging \
