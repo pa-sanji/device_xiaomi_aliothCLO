@@ -114,27 +114,19 @@ PRODUCT_PACKAGES += \
 # 2026-11-04 bootlogs stop at SystemServerTiming: StartAudioService).
 $(call soong_config_set_bool,android_hardware_audio,skip_speaker_layout_channel_mask_field,true)
 
+# Keep the vendor property set for the prebuilt primary HAL aligned with the
+# PocoF3Releases aosp-17 recipe, which runs the identical audio.primary blob
+# without any of the MIUI feature properties (karaok, us proximity, zoom,
+# scenario, misound, ...). Those were inherited from the pipa port where they
+# matched pipa's own HAL; on the alioth blob they enable MIUI code paths that
+# hook adev_open_input_stream (karaoke fastcapture, ultrasound proximity,
+# fcsam audio zoom), and with them set the first boot-time input probe never
+# returns - the audio service's last log in the 2026-11-04 bootlogs (build
+# #44) is "adev_open_input_stream: enter ... io_handle(14)" and the system
+# server then watchdogs in a loop at StartAudioService.
 PRODUCT_VENDOR_PROPERTIES += \
-    persist.vendor.audio.delta.refresh=true \
-    persist.vendor.audio.misound.disable=true \
-    persist.vendor.audio.ring.filter.mask=0 \
-    ro.audio.monitorRotation=true \
     ro.config.vc_call_vol_steps=11 \
-    ro.hardware.audio.primary=alioth \
-    ro.vendor.audio.enhance.support=false \
-    ro.vendor.audio.gain.support=true \
-    ro.vendor.audio.karaok.support=true \
-    ro.vendor.audio.ns.support=false \
-    ro.vendor.audio.scenario.support=true \
-    ro.vendor.audio.soundfx.type=mi \
-    ro.vendor.audio.soundfx.usb=true \
-    ro.vendor.audio.support.sound.id=true \
-    ro.vendor.audio.us.proximity=true \
-    ro.vendor.audio.us.type=mius \
-    ro.vendor.audio.zoom.support=true \
-    ro.vendor.audio.zoom.type=1 \
-    vendor.audio.spkcal.copy.inhal=true \
-    vendor.audio.usb.disable.sidetone=true
+    ro.hardware.audio.primary=alioth
 
 PRODUCT_SYSTEM_PROPERTIES += \
     ro.audio.usb.period_us=20375 \
