@@ -60,82 +60,57 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.device_id_attestation.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.device_id_attestation.xml
 
 # Audio
-$(call soong_config_set,tinycompress,enable_extended_compress_format,true)
-$(call soong_config_set,tinycompress,loop_compress_read,true)
+# Matches the AOSPA kona alioth recipe (aospa-kona/android_device_xiaomi_alioth
+# vauxite): the MIUI prebuilt primary HAL from proprietary_vendor_xiaomi plus
+# the qti kona audio configuration, with the platform audio component (qti
+# audio) providing the HIDL service, effect modules and policy copies.
+PRODUCT_PACKAGES += \
+    libqcompostprocbundle \
+    libqcomvisualizer \
+    libqcomvoiceprocessing
 
-# Primary HAL: built from source from the LineageOS CAF sm8250 repo
-# (hardware/qcom-caf/sm8250/audio, lineage-24.0-caf-sm8250), the HAL generation
-# LineageOS alioth and kaffu run on sm8250. It is matched to the kona ADSP
-# images and the vauxite/PocoF3Releases platform configs, unlike:
-#  - the pipa-generation HAL (aospa-pipa calcite-865, build #40): boots, but
-#    every playback pcm_prepare failed at the ADSP (1426 failures, app_type
-#    69943 topology 0x10c68), so no sound;
-#  - the MIUI prebuilt blob (audio.primary.alioth.so, builds #43-#45): the
-#    first boot-time input probe (adev_open_input_stream io_handle 14) never
-#    returned on the E404 kernel, so the system server watchdog-looped at
-#    StartAudioService regardless of properties or configuration.
+# HIDL service + impls, kept explicit so the 32-bit legacy HAL wrapper is
+# always packaged at the path init expects (audio.primary.kona itself comes
+# from qti-audio.mk -> configs/kona/kona.mk).
 PRODUCT_PACKAGES += \
     android.hardware.audio@6.0-impl \
     android.hardware.audio.effect@6.0-impl \
     android.hardware.audio.service \
-    android.hardware.soundtrigger@2.3-impl \
+    audio.primary.kona
+
+# The prebuilt primary HAL (vendor/lib/hw/audio.primary.alioth.so) has a hard
+# DT_NEEDED on libaudioroute-v34.so, the VNDK-34 flavoured audioroute:
+#
+#   readelf -d .../audio.primary.alioth.so | grep audioroute
+#       [NEEDED] libaudioroute-v34.so
+#       [NEEDED] libaudioroute_ext.so
+#
+# hardware/lineage/compat provides that module (prebuilt vndk/v34). Without it
+# the linker cannot load the blob; nothing else pulls it in automatically.
+PRODUCT_PACKAGES += \
     libaudioroute-v34
 
-PRODUCT_PACKAGES += \
-    audio.primary.kona \
-    audio.r_submix.default \
-    audio.usbv2.default
-
-PRODUCT_PACKAGES += \
-    liba2dpoffload \
-    libaudiopreprocessing \
-    libbatterylistener \
-    libbundlewrapper \
-    libcomprcapture \
-    libdownmix \
-    libdynproc \
-    libeffectproxy \
-    libexthwplugin \
-    libhdmiedid \
-    libhfp \
-    libldnhncr \
-    libqcompostprocbundle \
-    libqcomvisualizer \
-    libqcomvoiceprocessing \
-    libreverbwrapper \
-    libsndmonitor \
-    libspkrprot \
-    libvisualizer \
-    libvolumelistener
-
-# Compile the vendor-side HIDL audio glue without the Android 17
-# speaker_layout_channel_mask field of audio_port_config_device_ext so the
-# exchanged audio_port_config structs stay compatible with the CAF HAL and
-# the prebuilt sound trigger blob, neither of which knows the field.
-$(call soong_config_set_bool,android_hardware_audio,skip_speaker_layout_channel_mask_field,true)
-
-# The 32-bit android.hardware.audio.service loads
-# audio.primary.<ro.hardware.audio.primary>.so from /vendor/lib/hw.
-#
-# Use the MIUI prebuilt HAL (audio.primary.alioth.so, the pristine upstream
-# PocoF3Releases blob). It is the only userspace audio stack proven to open
-# playback sessions on this device's ADSP: source-built HALs (both the pipa
-# generation and the CAF sm8250 one) boot but every playback pcm_prepare fails
-# (build #47: FE 4 -> BE 87 TERT_TDM_RX_0, app_type 69937, acdb_dev_id 10011
-# all correct, yet the ADSP rejects the session), while the MIUI blob works on
-# this same 4.19 kernel in other ROMs.
-#
-# The blob blocked on A17 only because AudioPolicyManager's boot-time input
-# profile probing opens an input stream before the system is up, and the blob's
-# adev_open_input_stream() never returns for that first probe (builds #43-#45).
-# ro.audio.probe_input_profiles=0 skips that probing (see the frameworks/av
-# patch); input devices are validated on first use instead.
 PRODUCT_VENDOR_PROPERTIES += \
+    persist.vendor.audio.delta.refresh=true \
+    persist.vendor.audio.misound.disable=true \
+    persist.vendor.audio.ring.filter.mask=0 \
+    ro.audio.monitorRotation=true \
     ro.config.vc_call_vol_steps=11 \
-    ro.hardware.audio.primary=alioth
-
-PRODUCT_SYSTEM_PROPERTIES += \
-    ro.audio.probe_input_profiles=false
+    ro.hardware.audio.primary=alioth \
+    ro.vendor.audio.enhance.support=false \
+    ro.vendor.audio.gain.support=true \
+    ro.vendor.audio.karaok.support=true \
+    ro.vendor.audio.ns.support=false \
+    ro.vendor.audio.scenario.support=true \
+    ro.vendor.audio.soundfx.type=mi \
+    ro.vendor.audio.soundfx.usb=true \
+    ro.vendor.audio.support.sound.id=true \
+    ro.vendor.audio.us.proximity=true \
+    ro.vendor.audio.us.type=mius \
+    ro.vendor.audio.zoom.support=true \
+    ro.vendor.audio.zoom.type=1 \
+    vendor.audio.spkcal.copy.inhal=true \
+    vendor.audio.usb.disable.sidetone=true
 
 PRODUCT_SYSTEM_PROPERTIES += \
     ro.audio.usb.period_us=20375 \
@@ -162,12 +137,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/mixer_paths_overlay_static.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths_overlay_static.xml \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio/audio_policy_configuration.xml \
     $(LOCAL_PATH)/configs/audio/audio_effects.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.xml \
-    $(LOCAL_PATH)/configs/audio/audio_io_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_io_policy.conf \
-    frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration.xml \
-    frameworks/av/services/audiopolicy/config/default_volume_tables.xml:$(TARGET_COPY_OUT_VENDOR)/etc/default_volume_tables.xml \
-    frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml \
-    frameworks/native/data/etc/android.hardware.audio.low_latency.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.audio.low_latency.xml \
-    frameworks/native/data/etc/android.hardware.audio.pro.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.audio.pro.xml
+    $(LOCAL_PATH)/configs/audio/audio_io_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_io_policy.conf
 
 # Battery
 PRODUCT_SYSTEM_PROPERTIES += \
@@ -329,15 +299,12 @@ PRODUCT_PACKAGES += \
     fastbootd
 
 # Fingerprint
-# The AIDL service from hardware/xiaomi, matching PocoF3Releases
-# device_xiaomi_sm8250-common/kona.mk:205. The old HIDL
-# @2.3-service.xiaomi (hardware/xiaomi/hidl) SIGSEGVs at startup under A17
-# (fault addr 0xc0 during the hw module open, restart-looped by init, leaving
-# "HIDL daemon is null" everywhere); the AIDL service null-checks the module
-# and its open method and loads fingerprint.fpc.default.so through
-# hw_get_module_by_class("fingerprint", "fpc").
-PRODUCT_PACKAGES += \
-    android.hardware.biometrics.fingerprint-service.xiaomi
+# AOSPA alioth ships the prebuilt MIUI HIDL @2.1 service
+# (vendor/bin/hw/android.hardware.biometrics.fingerprint@2.1-service, its rc
+# and VINTF fragments) with the FPC blob, installed from the vendor tree by
+# alioth-vendor.mk. The framework uses the HIDL path, selected by the non-empty
+# config_biometric_sensors in the AliothFrameworks overlay.
+
 
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.fingerprint.sensor_location=1080|965|115|local:4630946736638489729 \
@@ -570,13 +537,10 @@ PRODUCT_PACKAGES += \
     libjson
 
 # QTI
-# Note: the "audio" component is deliberately excluded. It would pull in
-# vendor/qcom/opensource/audio-hal/primary-hal (removed from the manifest in
-# favour of hardware/qcom-caf/sm8250/audio) and duplicate the audio packages
-# and policy configuration copies defined above.
 TARGET_COMMON_QTI_COMPONENTS := \
     adreno \
     alarm \
+    audio \
     av \
     bt \
     charging \

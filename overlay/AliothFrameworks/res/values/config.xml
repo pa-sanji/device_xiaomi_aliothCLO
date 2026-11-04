@@ -460,18 +460,13 @@
     <!-- Indicates whether device has a power button fingerprint sensor. -->
     <bool name="config_is_powerbutton_fps">true</bool>
 
-    <!-- config_biometric_sensors selects the HAL flavour in
-         AuthService.registerFingerprintSensors():
-             new FingerprintSensorConfigurations(
-                     !(hidlConfigStrings != null && hidlConfigStrings.length > 0))
-         An empty array keeps hidlConfigStrings empty, so no HIDL sensors are
-         registered; the AIDL instance declared by the
-         android.hardware.biometrics.fingerprint-service.xiaomi VINTF fragment
-         is picked up through FingerprintService.getDeclaredInstances(), the
-         same way PocoF3Releases runs it. A non-empty array would register the
-         HIDL path (HidlToAidlSensorAdapter, @2.1 interface), which the A17
-         build no longer ships - its @2.3 service SIGSEGVs at startup. -->
-    <string-array name="config_biometric_sensors" translatable="false" />
+    <!-- config_biometric_sensors: kept non-empty, selecting the HIDL path in
+         AuthService.registerFingerprintSensors(). The @2.1 service from the
+         vendor tree (prebuilt MIUI HAL) serves it, exactly as AOSPA alioth
+         does. -->
+    <string-array name="config_biometric_sensors" translatable="false" >
+        <item>0:2:15</item> <!-- ID0:Fingerprint:Strong -->
+    </string-array>
 
     <!-- Whether device supports double tap to wake -->
     <bool name="config_supportDoubleTapWake">true</bool>
