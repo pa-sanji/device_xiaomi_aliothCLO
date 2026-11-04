@@ -365,8 +365,11 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     debug.sf.hwc_hdcp_via_neg_vsync=1 \
     ro.surface_flinger.enable_layer_caching=false
 
-PRODUCT_SYSTEM_PROPERTIES += \
-    ro.config.avoid_gfx_accel=true
+# NOTE: do not set ro.config.avoid_gfx_accel=true here. ActivityManager
+# .isHighEndGfx() returns false when it is set, which makes SystemUI's
+# BlurUtils.supportsBlursOnWindows() return false and disables window blur
+# unconditionally (even though WindowManager reports mBlurEnabled=true).
+# It was inherited from the pipa-port tree and is not set by the reference.
 
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     debug.sf.enable_transaction_tracing=false
@@ -500,12 +503,30 @@ PRODUCT_VENDOR_PROPERTIES += \
 endif
 
 # Media
+# OMX stays enabled: the camera MediaRecorder resolves its AAC encoder through
+# the OMX store (OMX.qcom.audio.encoder.aac from libOmxAacEnc), and the Dolby
+# AC-4/E-AC-3/DD+ decoders are OMX components as well. The reference build also
+# keeps OMX enabled.
 TARGET_SUPPORTS_OMX_SERVICE := false
 
 PRODUCT_VENDOR_PROPERTIES += \
     debug.stagefright.c2inputsurface=-1 \
-    ro.odm.build.media_performance_class=30 \
-    vendor.media.omx=0
+    ro.odm.build.media_performance_class=30
+
+# AOSP software codec lists referenced by media_codecs.xml (audio/AAC,
+# telephony and software video fallbacks).
+PRODUCT_COPY_FILES += \
+    frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_audio.xml \
+    frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_telephony.xml \
+    frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_video.xml
+
+# OMX plumbing used by the vendor OMX service for the software/vendor codecs.
+PRODUCT_PACKAGES += \
+    libcodec2_hidl@1.0.vendor \
+    libcodec2_soft_common.vendor \
+    libstagefright_omx.vendor \
+    libstagefright_softomx.vendor \
+    libstagefright_softomx_plugin.vendor
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/media/media_codecs_c2.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_c2.xml \
