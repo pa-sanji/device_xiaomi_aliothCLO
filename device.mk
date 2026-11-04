@@ -112,7 +112,15 @@ PRODUCT_VENDOR_PROPERTIES += \
     vendor.audio.spkcal.copy.inhal=true \
     vendor.audio.usb.disable.sidetone=true
 
+# The MIUI primary HAL blocks inside adev_open_input_stream() for the first
+# boot-time input probe on this kernel (builds #43-#46: io_handle 14 never
+# returned and the system server watchdog-looped at StartAudioService). A17's
+# AudioPolicyManager probes every input profile at boot; the aospa-kona
+# reference is an Android 14 tree whose ROM does not hit this. Skip the input
+# probing (frameworks/av patch, default true) so the blob can boot; input
+# devices are validated on first use instead.
 PRODUCT_SYSTEM_PROPERTIES += \
+    ro.audio.probe_input_profiles=false \
     ro.audio.usb.period_us=20375 \
     af.resampler.quality=7 \
     ro.audio.resampler.psd.stopband=132 \
