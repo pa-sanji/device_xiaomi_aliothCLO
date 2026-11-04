@@ -141,6 +141,48 @@ PRODUCT_ODM_PROPERTIES += \
     vendor.audio.offload.track.enable=false \
     vendor.audio.offload.buffer.size.kb=256
 
+# Audio input-hang diagnostics (temporary bring-up build).
+# The MIUI HAL hangs in adev_open_input_stream() for CAMCORDER/BACK_MIC; enable
+# verbose logging for every HAL/AudioFlinger tag involved so the last executed
+# step is visible in logcat. The 60 s timecheck keeps audioserver alive long
+# enough to dump the audio HAL stack before the watchdog aborts it.
+PRODUCT_VENDOR_PROPERTIES += \
+    log.tag.audio_hw_primary=V \
+    log.tag.audio_hw_extn=V \
+    log.tag.audio_hw_utils=V \
+    log.tag.audio_hw_acdb=V \
+    log.tag.audio_hw_cin=V \
+    log.tag.audio_hw_compress=V \
+    log.tag.audio_hw_ssr=V \
+    log.tag.audio_hw_sndmonitor=V \
+    log.tag.audio_hw_hfp=V \
+    log.tag.audio_hw_cspl_cal=V \
+    log.tag.audio_hw_hidl=V \
+    log.tag.audio_hw_usb=V \
+    log.tag.audio_hw_call_back=V \
+    log.tag.audio_hw_dev_arbi=V \
+    log.tag.audio_hw_dolby=V \
+    log.tag.platform_info=V \
+    log.tag.msm8974_platform=V \
+    log.tag.soundtrigger=V \
+    log.tag.sound_trigger_hw=V \
+    log.tag.sound_trigger_platform=V \
+    log.tag.voice=V \
+    log.tag.voice_extn=V
+
+PRODUCT_SYSTEM_PROPERTIES += \
+    log.tag.AudioFlinger=V \
+    log.tag.AudioPolicyManager=V \
+    log.tag.AudioPolicyService=V \
+    log.tag.AudioRecord=V \
+    log.tag.AudioSystem=V \
+    log.tag.AudioTrack=V \
+    log.tag.MediaRecorder=V \
+    ro.logd.size=16M \
+    ro.logd.size.main=16M \
+    ro.logd.size.system=16M \
+    ro.logd.size.crash=16M
+
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/mixer_paths_overlay_static.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths_overlay_static.xml \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio/audio_policy_configuration.xml \
