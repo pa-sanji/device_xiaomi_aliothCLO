@@ -147,6 +147,29 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/audio_effects.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.xml \
     $(LOCAL_PATH)/configs/audio/audio_io_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_io_policy.conf
 
+# Dolby
+# Xiaomi QDSP DAP integration, ported from PocoF3Releases (device_xiaomi_sm8250-common
+# aosp-17 and hardware_xiaomi cnb). The MIUI primary HAL drives the ADSP DAP module
+# already present in the vendor tree (vendor/lib/rfsa/adsp/capi_v2_dap_cpdp.so); the
+# DMS HAL exposes the QDSP effect parameters to AudioFlinger through the "dap" effect,
+# and XiaomiDolby is the system app that controls it.
+include hardware/xiaomi/dolby/dolby.mk
+
+PRODUCT_PACKAGES += \
+    DSPVolumeSynchronizer \
+    XiaomiDolby \
+    libstagefright_foundation-v33.vendor
+
+PRODUCT_VENDOR_PROPERTIES += \
+    ro.vendor.audio.dolby.dap.control=qdsp \
+    ro.vendor.audio.dolby.dax.support=true \
+    ro.vendor.audio.dolby.dax.version=DAX3_3.6 \
+    ro.vendor.audio.dolby.spatializer.support?=false \
+    ro.vendor.audio.dolby.speaker_tuning.support?=false \
+    ro.vendor.audio.dolby.surround.enable=true \
+    ro.vendor.dolby.dax.version=DAX3_3.6.1.6_r1 \
+    vendor.audio.dolby.control.tunning.by.volume.support?=false
+
 # Battery
 PRODUCT_SYSTEM_PROPERTIES += \
     ro.config.small_battery=true
