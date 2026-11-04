@@ -116,9 +116,26 @@ $(call soong_config_set_bool,android_hardware_audio,skip_speaker_layout_channel_
 
 # The 32-bit android.hardware.audio.service loads
 # audio.primary.<ro.hardware.audio.primary>.so from /vendor/lib/hw.
+#
+# Use the MIUI prebuilt HAL (audio.primary.alioth.so, the pristine upstream
+# PocoF3Releases blob). It is the only userspace audio stack proven to open
+# playback sessions on this device's ADSP: source-built HALs (both the pipa
+# generation and the CAF sm8250 one) boot but every playback pcm_prepare fails
+# (build #47: FE 4 -> BE 87 TERT_TDM_RX_0, app_type 69937, acdb_dev_id 10011
+# all correct, yet the ADSP rejects the session), while the MIUI blob works on
+# this same 4.19 kernel in other ROMs.
+#
+# The blob blocked on A17 only because AudioPolicyManager's boot-time input
+# profile probing opens an input stream before the system is up, and the blob's
+# adev_open_input_stream() never returns for that first probe (builds #43-#45).
+# ro.audio.probe_input_profiles=0 skips that probing (see the frameworks/av
+# patch); input devices are validated on first use instead.
 PRODUCT_VENDOR_PROPERTIES += \
     ro.config.vc_call_vol_steps=11 \
-    ro.hardware.audio.primary=kona
+    ro.hardware.audio.primary=alioth
+
+PRODUCT_SYSTEM_PROPERTIES += \
+    ro.audio.probe_input_profiles=false
 
 PRODUCT_SYSTEM_PROPERTIES += \
     ro.audio.usb.period_us=20375 \
@@ -312,12 +329,15 @@ PRODUCT_PACKAGES += \
     fastbootd
 
 # Fingerprint
-# HIDL @2.3, matching PocoF3Releases device_xiaomi_sm8250-common/kona.mk:209
-# and the working kaffu sm8250 reference. The MIUI blob is @2.1 (FPC), and the
-# @2.3 service is minor-version compatible, so it serves the @2.1 interface the
-# framework asks for when config_biometric_sensors is non-empty.
+# The AIDL service from hardware/xiaomi, matching PocoF3Releases
+# device_xiaomi_sm8250-common/kona.mk:205. The old HIDL
+# @2.3-service.xiaomi (hardware/xiaomi/hidl) SIGSEGVs at startup under A17
+# (fault addr 0xc0 during the hw module open, restart-looped by init, leaving
+# "HIDL daemon is null" everywhere); the AIDL service null-checks the module
+# and its open method and loads fingerprint.fpc.default.so through
+# hw_get_module_by_class("fingerprint", "fpc").
 PRODUCT_PACKAGES += \
-    android.hardware.biometrics.fingerprint@2.3-service.xiaomi
+    android.hardware.biometrics.fingerprint-service.xiaomi
 
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.fingerprint.sensor_location=1080|965|115|local:4630946736638489729 \
