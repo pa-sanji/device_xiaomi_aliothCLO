@@ -256,6 +256,7 @@ PRODUCT_PACKAGES += \
 # Display
 PRODUCT_VENDOR_PROPERTIES += \
     persist.sys.sf.native_mode=269 \
+    ro.surface_flinger.supports_background_blur=1 \
     ro.vendor.display.paneltype=2 \
     ro.vendor.display.sensortype=2 \
     vendor.display.qdcm.mode_combine=1 \

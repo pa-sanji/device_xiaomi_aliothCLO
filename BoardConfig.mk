@@ -14,7 +14,7 @@
 
 DEVICE_PATH := device/xiaomi/alioth
 HARDWARE_PATH := hardware/xiaomi
-
+TARGET_USES_BLUR := true
 # A/B
 AB_OTA_UPDATER := true
 AB_OTA_PARTITIONS := \
