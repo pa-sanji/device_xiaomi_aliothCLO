@@ -210,7 +210,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.camera.raw.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.raw.xml
 
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/camera/camxoverridesettings.txt:$(TARGET_COPY_OUT_VENDOR)/etc/camera/camxoverridesettings.txt \
     $(LOCAL_PATH)/configs/camera/st_license.lic:$(TARGET_COPY_OUT_VENDOR)/etc/camera/st_license.lic
 
 PRODUCT_PACKAGES += \
@@ -225,6 +224,16 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libpiex_shim \
     libutilscallstack.vendor
+
+# Xiaomi Camera (MiuiCamera)
+# Device-side integration from PocoF3Releases device_xiaomi_camera (aosp-17):
+# permissions, device features, CamX overrides, SELinux policy, JNI shims and
+# the MiuiCameraOverlay RRO, plus the proprietary APK/libs from
+# pa-sanji/vendor_xiaomi_camera (aosp-17, mirror of the upstream
+# johnmart19/vendor_xiaomi_camera repository). The camxoverridesettings.txt it
+# installs is byte-identical to the copy previously made from configs/camera,
+# which is why that duplicate copy rule is removed above.
+-include device/xiaomi/camera/miuicamera.mk
 
 # Cgroup and task_profiles
 PRODUCT_COPY_FILES += \
