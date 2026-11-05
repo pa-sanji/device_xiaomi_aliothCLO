@@ -513,10 +513,15 @@ PRODUCT_VENDOR_PROPERTIES += \
     debug.stagefright.c2inputsurface=-1 \
     ro.odm.build.media_performance_class=30
 
-# AOSP software codec lists referenced by media_codecs.xml (audio/AAC,
-# telephony and software video fallbacks).
+# AOSP software codec lists referenced by media_codecs.xml.
+#
+# Do NOT install media_codecs_google_audio.xml: it advertises the OMX-only
+# OMX.google.aac.encoder, but Android 17 no longer ships
+# libstagefright_soft_aacenc.so. With that entry present, MediaCodecSource
+# (flags=0, no software-codec sort) tries it before the Codec2 AAC encoder and
+# ACodec fails with "Unexpected nullptr for codec information". The C2 encoder
+# from the media.swcodec APEX is the working AAC encoder.
 PRODUCT_COPY_FILES += \
-    frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_audio.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_telephony.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_video.xml
 
