@@ -736,7 +736,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     android.hardware.sensors@1.0-impl-xiaomi \
     android.hardware.sensors@1.0-service \
-    libsensorndkbridge
+    libsensorndkbridge \
+    sensors.xiaomi
 
 # Shipping API
 PRODUCT_SHIPPING_API_LEVEL := 30
