@@ -1,0 +1,2 @@
+# Ultrasound IIO sysfs
+genfscon sysfs /devices/platform/us_prox.0/iio:device    u:object_r:vendor_sysfs_iio:s0
