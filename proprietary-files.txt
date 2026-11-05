@@ -981,7 +981,7 @@ vendor/lib64/libssc_default_listener.so|1653233f7454f3be9e8361ab5fde7cd45e9ac9b4
 vendor/lib64/libssccalapi.so|15a9f09746bde51c99b2f82692986a395306a295
 vendor/lib64/libultrasound.so|99ba87b30969ee01026bfe33b2348f0e933fe2b6
 vendor/lib64/sensors.elliptic.so|60d2badb6950b36697fabf8886890de503975e11
-vendor/lib64/sensors.mius.proximity.so|442c2ff663cb86b5e571b2fa7d54babebb90a35f
+vendor/lib64/sensors.mius.proximity.so|1fb0bc58ecbe4750c85b7512754e2b4ed49ba6c9
 vendor/lib64/sensors.ssc.so|5eade1294d1d60e5f3ab404ab4c57c35082b48d5
 
 # Sensor (calibrate) - MIUI

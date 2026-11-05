@@ -75,6 +75,10 @@ function blob_fixup() {
             [ "$2" = "" ] && return 0
             grep -q "libcrypto_shim.so" "${2}" || "${PATCHELF}" --add-needed "libcrypto_shim.so" "${2}"
             ;;
+        vendor/lib64/sensors.mius.proximity.so)
+            [ "$2" = "" ] && return 0
+            python3 "${MY_DIR}/mius_poll_fixup.py" "${2}"
+            ;;
         *)
             return 1
             ;;
