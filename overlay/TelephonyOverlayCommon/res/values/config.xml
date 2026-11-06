@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Default device ImsService implementation for MMTEL. -->
-    <string name="config_ims_mmtel_package" translatable="false">org.codeaurora.ims</string>
+    <!--
+      The A17 QTI telephony stack expects the AIDL IMS services
+      vendor.qti.hardware.radio.qtiradioconfig and
+      vendor.qti.ims.factoryaidlservice. Those service binaries are not
+      present in this vendor tree, so org.codeaurora.ims.ImsService
+      blocks for 20 s waiting for them and ANRs the whole com.qti.phone
+      process.
 
-    <!-- Default device ImsService implementation for RCS. -->
-    <string name="config_ims_rcs_package" translatable="false">vendor.qti.imsrcs</string>
+      Keep the device ImsService unset until those AIDL services are
+      available. This disables IMS/VoLTE/VoWiFi/RCS and restores the
+      normal CS SMS path.
+    -->
+    <string name="config_ims_mmtel_package" translatable="false"></string>
+    <string name="config_ims_rcs_package" translatable="false"></string>
 
 </resources>
