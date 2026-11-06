@@ -179,3 +179,6 @@ TARGET_USERIMAGES_USE_F2FS := true
 # only private/public.
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += hardware/samsung-ext/interfaces/sepolicy/private
 SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += hardware/samsung-ext/interfaces/sepolicy/public
+
+# Explicit framework opt-in for the Qualcomm DAX 3.6 effect contract.
+$(call soong_config_set_bool,audio,legacy_dap_integration,true)
