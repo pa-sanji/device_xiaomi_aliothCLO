@@ -2,18 +2,23 @@
 <resources>
 
     <!--
-      The A17 QTI telephony stack expects the AIDL IMS services
-      vendor.qti.hardware.radio.qtiradioconfig and
-      vendor.qti.ims.factoryaidlservice. Those service binaries are not
-      present in this vendor tree, so org.codeaurora.ims.ImsService
-      blocks for 20 s waiting for them and ANRs the whole com.qti.phone
-      process.
+      Build 105: use the beryl (A16) QTI phone app stack with the matching
+      IMS JNI libraries against the alioth HIDL vendor radio.
 
-      Keep the device ImsService unset until those AIDL services are
-      available. This disables IMS/VoLTE/VoWiFi/RCS and restores the
-      normal CS SMS path.
+      The A15 QtiTelephony predates the A17 extphonelib IExtPhone.queryNrIcon
+      method and crashed with AbstractMethodError. The beryl QtiTelephony
+      implements that method and still has the HIDL QtiRadio/QtiRadioConfig
+      fallback needed by this vendor tree.
+
+      The A15 ims.apk also crashed in JNI_OnLoad because it was paired with
+      the A17 QSSI libimsmedia_jni.so. The beryl ims.apk is now paired with the
+      matching beryl libimsmedia_jni/lib-imsvt libraries.
+
+      The device manifest intentionally has no AIDL IMS/QTI entries; the
+      vendor provides HIDL IImsRadio 1.7, IQtiRadio 2.6, IQcRilAudio and
+      qcrilhook services.
     -->
-    <string name="config_ims_mmtel_package" translatable="false"></string>
-    <string name="config_ims_rcs_package" translatable="false"></string>
+    <string name="config_ims_mmtel_package" translatable="false">org.codeaurora.ims</string>
+    <string name="config_ims_rcs_package" translatable="false">org.codeaurora.ims</string>
 
 </resources>
