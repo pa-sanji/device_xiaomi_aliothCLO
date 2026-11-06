@@ -1,246 +1,253 @@
 /*
- * SPDX-FileCopyrightText: 2020 The LineageOS Project
- * SPDX-FileCopyrightText: 2025 Paranoid Android
+ * Copyright (C) 2020 The LineageOS Project
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package co.aospa.xiaomiparts.thermal
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
-import android.os.UserHandle
-import android.provider.MediaStore
-import android.telecom.TelecomManager
-import androidx.annotation.StringRes
-import androidx.preference.PreferenceManager
-import co.aospa.xiaomiparts.R
-import co.aospa.xiaomiparts.utils.dlog
-import co.aospa.xiaomiparts.utils.writeLine
-import com.android.settingslib.applications.AppUtils.isBrowserApp
+import android.hardware.display.DisplayManager
+import android.os.*
+import android.util.Log
+import android.view.Display
+import co.aospa.xiaomiparts.touchsampling.TouchSamplingUtils
+import co.aospa.xiaomiparts.utils.FileUtils
+import co.aospa.xiaomiparts.utils.PartsPreferences
+import vendor.xiaomi.hardware.touchfeature.V1_0.ITouchFeature
 
-/** Helper utility class for thermal profiles. */
-class ThermalUtils
-private constructor(
-    private val context: Context,
-) {
-    private val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-    private val serviceIntent = Intent(context, ThermalService::class.java)
+class ThermalUtils(context: Context) {
+    companion object {
+        const val STATE_DEFAULT = 0
+        private const val SCONFIG = "/sys/class/thermal/thermal_message/sconfig"
+        private const val MAP = "persist.sys.xiaomi.thermal.map"
+        private val PREFIXES =
+            listOf(
+                "thermal.benchmark=",
+                "thermal.browser=",
+                "thermal.camera=",
+                "thermal.dialer=",
+                "thermal.gaming=",
+                "thermal.streaming=",
+                "thermal.navigation=",
+                "thermal.alt_gaming=",
+                "thermal.per_normal=",
+                "thermal.per_class0=",
+                "thermal.per_navigation=",
+                "thermal.per_video=",
+                "thermal.normal=",
+            )
 
-    var enabled: Boolean = sharedPrefs.getBoolean(THERMAL_ENABLED, false)
-        set(value) {
-            if (field == value) return
-            field = value
-            sharedPrefs.edit().putBoolean(THERMAL_ENABLED, value).apply()
-            if (value) {
-                startService()
-            } else {
-                setDefaultThermalProfile()
-                stopService()
+        @JvmStatic
+        fun startService(context: Context) {
+            ensureRegion()
+            if (FileUtils.isFileWritable(SCONFIG))
+                context.startService(Intent(context, ThermalService::class.java))
+        }
+
+        fun ensureRegion() {
+            val map = SystemProperties.get(MAP, "")
+            if (map == "global" || (map == "india" && isIndiaMapAvailable())) return
+            val hw = SystemProperties.get("ro.boot.hwversion", "")
+            val india =
+                listOf("9.21", "9.22", "9.29").any { hw.startsWith(it) } && isIndiaMapAvailable()
+            try {
+                SystemProperties.set(MAP, if (india) "india" else "global")
+            } catch (error: RuntimeException) {
+                Log.w("ThermalUtils", "Cannot initialize thermal map", error)
             }
         }
 
-    var value: String = readValue()
-        set(value) {
-            if (field == value) return
-            field = value
-            writeValue(value)
+        fun isIndiaMapAvailable() = FileUtils.fileExists("/vendor/etc/thermal-map-india.conf")
+
+        fun getCurrentSconfig(): Int? =
+            FileUtils.readOneLine(SCONFIG)?.trim()?.toIntOrNull()?.takeIf { it >= 0 }
+
+        fun getSelectedRegion() =
+            if (SystemProperties.get(MAP, "") == "india" && isIndiaMapAvailable())
+                ThermalProfiles.REGION_INDIA
+            else ThermalProfiles.REGION_GLOBAL
+
+        private fun touchFeature(): ITouchFeature? =
+            try {
+                ITouchFeature.getService()
+            } catch (error: Exception) {
+                Log.d("ThermalUtils", "Touch HAL unavailable", error)
+                null
+            }
+    }
+
+    private val app = context.applicationContext
+    private val prefs = PartsPreferences.getDefaultSharedPreferences(app)
+    private val display =
+        app.getSystemService(DisplayManager::class.java)?.getDisplay(Display.DEFAULT_DISPLAY)
+    private var hal = touchFeature()
+    private var touchChanged = false
+
+    fun setSelectedRegion(region: Int): Boolean {
+        if (region != ThermalProfiles.REGION_GLOBAL && region != ThermalProfiles.REGION_INDIA)
+            return false
+        if (region == ThermalProfiles.REGION_INDIA && !isIndiaMapAvailable()) return false
+        val value = if (region == ThermalProfiles.REGION_INDIA) "india" else "global"
+        try {
+            SystemProperties.set(MAP, value)
+        } catch (error: RuntimeException) {
+            Log.w("ThermalUtils", "Cannot change thermal map", error)
+            return false
+        }
+        Handler(Looper.getMainLooper()).postDelayed({ startService(app) }, 350)
+        return SystemProperties.get(MAP, "") == value
+    }
+
+    fun getBaseSconfig(): Int =
+        prefs.getInt("thermal_base_sconfig", 0).let {
+            if (ThermalProfiles.findBySconfig(getSelectedRegion(), it) != null) it else 0
         }
 
-    fun startService() {
-        if (enabled) {
-            dlog(TAG, "startService")
-            context.startServiceAsUser(serviceIntent, UserHandle.CURRENT)
+    fun setBaseSconfig(sconfig: Int): Boolean {
+        if (ThermalProfiles.findBySconfig(getSelectedRegion(), sconfig) == null) return false
+        prefs.edit().putInt("thermal_base_sconfig", sconfig).apply()
+        startService(app)
+        return true
+    }
+
+    private fun writeValue(value: List<String>) {
+        prefs.edit().putString("thermal_control", value.joinToString(":")).apply()
+    }
+
+    private fun getValue(): List<String> {
+        val saved = prefs.getString("thermal_control", null)?.split(':')
+        if (
+            saved != null &&
+                saved.isNotEmpty() &&
+                saved.size <= PREFIXES.size &&
+                saved.indices.all { saved[it].startsWith(PREFIXES[it]) }
+        ) {
+            return (saved + PREFIXES.drop(saved.size)).also {
+                if (saved.size != PREFIXES.size) writeValue(it)
+            }
         }
+        return PREFIXES.also { writeValue(it) }
     }
 
-    fun stopService() {
-        dlog(TAG, "stopService")
-        context.stopService(serviceIntent)
+    fun writePackage(packageName: String, state: Int) {
+        if (
+            packageName.isEmpty() ||
+                (state != STATE_DEFAULT &&
+                    ThermalProfiles.findByStorageState(getSelectedRegion(), state) == null)
+        )
+            return
+        val modes =
+            getValue()
+                .map { profile ->
+                    profile.substringBefore('=') +
+                        "=" +
+                        profile
+                            .substringAfter('=')
+                            .split(',')
+                            .filter { it.isNotEmpty() && it != packageName }
+                            .joinToString(",")
+                            .let { if (it.isEmpty()) "" else "$it," }
+                }
+                .toMutableList()
+        if (state in 1..PREFIXES.size) modes[state - 1] += "$packageName,"
+        writeValue(modes)
+        startService(app)
     }
 
-    private fun writeValue(value: String) {
-        dlog(TAG, "writing pref value: $value")
-        sharedPrefs.edit().putString(THERMAL_CONTROL, value).apply()
+    fun getStateForPackage(packageName: String): Int {
+        if (packageName.isEmpty()) return STATE_DEFAULT
+        val index = getValue().indexOfFirst { packageName in it.substringAfter('=').split(',') }
+        return if (index < 0) STATE_DEFAULT else index + 1
     }
 
-    private fun readValue(): String = sharedPrefs.getString(THERMAL_CONTROL, null) ?: DEFAULT_VALUE
-
-    fun writePackage(packageName: String, mode: Int) {
-        dlog(TAG, "writePackage: $packageName -> $mode")
-        var newValue = value.replace("$packageName,", "")
-        val modes = newValue.split(":").toMutableList()
-        modes[mode] += "$packageName,"
-        value = modes.joinToString(":")
+    private fun writeThermalState(state: Int): Boolean {
+        val applied = FileUtils.writeLine(SCONFIG, state.toString())
+        if (!applied) Log.w("ThermalUtils", "Cannot write thermal state $state")
+        return applied
     }
 
-    fun getStateForPackage(packageName: String): ThermalState {
-        val modes = value.split(":")
-        return ThermalState.values().find { state -> modes[state.id].contains("$packageName,") }
-            ?: getDefaultStateForPackage(packageName)
+    fun setDefaultThermalProfile(): Boolean = writeThermalState(getBaseSconfig())
+
+    fun setThermalProfile(packageName: String): Boolean {
+        val state = getStateForPackage(packageName)
+        val target =
+            if (state == STATE_DEFAULT) getBaseSconfig()
+            else
+                ThermalProfiles.findByStorageState(getSelectedRegion(), state)?.sconfig
+                    ?: getBaseSconfig()
+        val applied = writeThermalState(target)
+        updateTouchModes(packageName)
+        return applied
     }
 
-    fun resetProfiles() {
-        dlog(TAG, "resetProfiles")
-        value = DEFAULT_VALUE
-    }
-
-    fun setDefaultThermalProfile() {
-        dlog(TAG, "setDefaultThermalProfile")
-        writeLine(THERMAL_SCONFIG, THERMAL_STATE_OFF)
-    }
-
-    fun setThermalProfile(packageName: String) {
-        if (packageName.isEmpty()) {
-            dlog(TAG, "setThermalProfile: packageName is empty")
+    private fun updateTouchModes(packageName: String) {
+        if (AliothTouchProfile.isSupported() && TouchSamplingUtils.isEnabled(app)) {
+            touchChanged = false
             return
         }
-        val state = getStateForPackage(packageName)
-        dlog(TAG, "setThermalProfile: $packageName -> $state")
-        writeLine(THERMAL_SCONFIG, state.config)
-    }
-
-    private fun getDefaultStateForPackage(packageName: String): ThermalState {
-        runCatching { context.packageManager.getApplicationInfo(packageName, 0) }
-            .onSuccess {
-                when (it.category) {
-                    ApplicationInfo.CATEGORY_GAME -> return ThermalState.GAMING
-                    ApplicationInfo.CATEGORY_VIDEO -> return ThermalState.VIDEO
-                    ApplicationInfo.CATEGORY_MAPS -> return ThermalState.NAVIGATION
-                }
+        val saved = prefs.getString(packageName, null)
+        resetTouchModes()
+        if (saved.isNullOrEmpty()) return
+        val values = saved.split(',').map { it.toIntOrNull() }
+        if (values.size != 4 || values.any { it == null }) return
+        if (hal == null) hal = touchFeature()
+        val touch = hal ?: return
+        val game = values[0]!!
+        val response = values[1]!!
+        val sensitivity = values[2]!!
+        val edge = values[3]!!
+        val active =
+            if (AliothTouchProfile.isSupported()) game
+            else if (response != 0 && sensitivity != 0 && edge != 0) 1 else 0
+        try {
+            if (AliothTouchProfile.isSupported()) {
+                AliothTouchProfile.applyMode(touch, Constants.MODE_TOUCH_TOLERANCE, sensitivity)
+                AliothTouchProfile.applyMode(touch, Constants.MODE_TOUCH_UP_THRESHOLD, response)
+            } else {
+                touch.setTouchMode(Constants.MODE_TOUCH_TOLERANCE, sensitivity)
+                touch.setTouchMode(Constants.MODE_TOUCH_UP_THRESHOLD, response)
             }
-            .onFailure {
-                return ThermalState.DEFAULT
-            }
-
-        return when {
-            NAVIGATION_PACKAGES.contains(packageName) -> ThermalState.NAVIGATION
-            VIDEO_CALL_PACKAGES.contains(packageName) -> ThermalState.VIDEOCALL
-            BENCHMARKING_APPS.contains(packageName) -> ThermalState.BENCHMARK
-            context.getSystemService(TelecomManager::class.java)?.defaultDialerPackage == packageName -> ThermalState.DIALER
-            isBrowserApp(context, packageName, UserHandle.myUserId()) -> ThermalState.BROWSER
-            isCameraApp(packageName) -> ThermalState.CAMERA
-            else -> ThermalState.DEFAULT
+            touch.setTouchMode(Constants.MODE_TOUCH_EDGE_FILTER, edge)
+            touch.setTouchMode(Constants.MODE_TOUCH_GAME_MODE, game)
+            touch.setTouchMode(Constants.MODE_TOUCH_ACTIVE_MODE, active)
+            if (game == 1) AliothTouchProfile.apply(touch, prefs, packageName)
+            touchChanged = true
+            updateTouchRotation()
+        } catch (error: RemoteException) {
+            Log.w("ThermalUtils", "Cannot apply touch profile", error)
+            resetBestEffort()
+            hal = null
+            touchChanged = false
         }
     }
 
-    private fun isCameraApp(packageName: String): Boolean {
-        val cameraIntent =
-            Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA).setPackage(packageName)
-        val activities =
-            context.packageManager.queryIntentActivitiesAsUser(
-                cameraIntent,
-                PackageManager.MATCH_ALL,
-                UserHandle.myUserId(),
-            )
-        return activities.any { it.activityInfo != null }
+    private fun resetBestEffort() {
+        val modes = mutableListOf(0, 1, 2, 3, 7, 8)
+        if (AliothTouchProfile.isSupported()) modes.addAll(listOf(4, 5, 6))
+        modes.forEach {
+            try {
+                hal?.resetTouchMode(it)
+            } catch (error: RemoteException) {
+                Log.d("ThermalUtils", "Cannot reset touch mode $it", error)
+            }
+        }
     }
 
-    enum class ThermalState(
-        val id: Int,
-        val config: String,
-        val prefix: String,
-        @StringRes val label: Int,
-    ) {
-        BENCHMARK(
-            0,
-            "10", // thermal-nolimits.conf
-            "thermal.benchmark=",
-            R.string.thermal_benchmark,
-        ),
-        BROWSER(
-            1,
-            "11", // thermal-class0.conf
-            "thermal.browser=",
-            R.string.thermal_browser,
-        ),
-        CAMERA(
-            2,
-            "12", // thermal-camera.conf
-            "thermal.camera=",
-            R.string.thermal_camera,
-        ),
-        DIALER(
-            3,
-            "8", // thermal-phone.conf
-            "thermal.dialer=",
-            R.string.thermal_dialer,
-        ),
-        GAMING(
-            4,
-            "13", // thermal-tgame.conf
-            "thermal.gaming=",
-            R.string.thermal_gaming,
-        ),
-        NAVIGATION(
-            5,
-            "19", // thermal-navigation.conf
-            "thermal.navigation=",
-            R.string.thermal_navigation,
-        ),
-        VIDEOCALL(
-            6,
-            "4", // thermal-videochat.conf
-            "thermal.streaming=",
-            R.string.thermal_streaming,
-        ),
-        VIDEO(
-            7,
-            "21", // thermal-video.conf
-            "thermal.video=",
-            R.string.thermal_video,
-        ),
-        DEFAULT(
-            8,
-            "0", // thermal-normal.conf
-            "thermal.default=",
-            R.string.thermal_default,
-        ),
+    fun resetTouchModes() {
+        if (!touchChanged) return
+        if (!(AliothTouchProfile.isSupported() && TouchSamplingUtils.isEnabled(app)))
+            resetBestEffort()
+        touchChanged = false
     }
 
-    companion object {
-        private const val TAG = "ThermalUtils"
-        private const val THERMAL_CONTROL = "thermal_control_v2"
-        private const val THERMAL_ENABLED = "thermal_enabled"
-
-        private const val THERMAL_SCONFIG = "/sys/class/thermal/thermal_message/sconfig"
-        private const val THERMAL_STATE_OFF = "0" // thermal-normal.conf
-
-        // Empty value to store if shared preference is null
-        private val DEFAULT_VALUE = ThermalState.values().map { it.prefix }.joinToString(":")
-
-        private val NAVIGATION_PACKAGES =
-            arrayOf(
-                "com.google.android.apps.maps",
-                "com.google.android.apps.mapslite",
-                "com.waze",
-            )
-        private val VIDEO_CALL_PACKAGES =
-            arrayOf(
-                "com.google.android.apps.tachyon",
-                "us.zoom.videomeetings",
-                "com.microsoft.teams",
-                "com.skype.raider",
-            )
-        private val BENCHMARKING_APPS =
-            arrayOf(
-                "com.primatelabs.geekbench5",
-                "com.primatelabs.geekbench6",
-                "com.antutu.ABenchMark",
-                "com.futuremark.dmandroid.application",
-                "com.futuremark.pcmark.android.benchmark",
-                "com.glbenchmark.glbenchmark27",
-                "com.texts.throttlebench",
-                "skynet.cputhrottlingtest",
-            )
-
-        @Volatile private var instance: ThermalUtils? = null
-
-        fun getInstance(context: Context) =
-            instance
-                ?: synchronized(this) {
-                    instance ?: ThermalUtils(context.applicationContext).also { instance = it }
-                }
+    fun updateTouchRotation() {
+        if (!touchChanged || display == null || hal == null) return
+        try {
+            hal?.setTouchMode(Constants.MODE_TOUCH_ROTATION, display.rotation)
+        } catch (error: RemoteException) {
+            Log.w("ThermalUtils", "Cannot update touch rotation", error)
+            hal = null
+            touchChanged = false
+        }
     }
 }

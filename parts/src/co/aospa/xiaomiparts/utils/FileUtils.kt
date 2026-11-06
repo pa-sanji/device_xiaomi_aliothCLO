@@ -1,79 +1,69 @@
 /*
- * SPDX-FileCopyrightText: 2016 The CyanogenMod Project
- * SPDX-FileCopyrightText: 2025 Paranoid Android
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright (C) 2016 The CyanogenMod Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package co.aospa.xiaomiparts.utils
 
 import android.util.Log
 import java.io.File
+import java.io.IOException
 
-private const val TAG = "FileUtils"
+object FileUtils {
+    @JvmStatic
+    fun readOneLine(fileName: String): String? =
+        try {
+            File(fileName).bufferedReader(bufferSize = 512).use { it.readLine() }
+        } catch (error: IOException) {
+            Log.w("FileUtils", "Could not read $fileName", error)
+            null
+        }
 
-/*
- * Reads the first line of text from the given file.
- *
- * @return the read line contents, or null on failure
- */
-fun readOneLine(fileName: String): String? =
-    runCatching { File(fileName).useLines { it.firstOrNull() } }
-        .onFailure { e -> Log.e(TAG, "Could not read from file $fileName", e) }
-        .getOrNull()
+    // use closes/flushed the writer before success is reported, including sysfs close errors.
+    @JvmStatic
+    fun writeLine(fileName: String, value: String): Boolean =
+        try {
+            File(fileName).bufferedWriter().use { it.write(value) }
+            true
+        } catch (error: IOException) {
+            Log.w("FileUtils", "Could not write $fileName", error)
+            false
+        }
 
-/*
- * Writes the given value into the given file
- *
- * @return true on success, false on failure
- */
-fun writeLine(fileName: String, value: String): Boolean =
-    runCatching { File(fileName).writeText(value) }
-        .onFailure { e -> Log.e(TAG, "Could not write to file $fileName", e) }
-        .isSuccess
+    @JvmStatic fun fileExists(fileName: String) = File(fileName).exists()
 
-/*
- * Checks whether the given file exists
- *
- * @return true if exists, false if not
- */
-fun fileExists(fileName: String): Boolean = File(fileName).exists()
+    @JvmStatic
+    fun isFileReadable(fileName: String) = File(fileName).let { it.exists() && it.canRead() }
 
-/*
- * Checks whether the given file is readable
- *
- * @return true if readable, false if not
- */
-fun isFileReadable(fileName: String): Boolean {
-    val file = File(fileName)
-    return file.exists() && file.canRead()
+    @JvmStatic
+    fun isFileWritable(fileName: String) = File(fileName).let { it.exists() && it.canWrite() }
+
+    @JvmStatic
+    fun delete(fileName: String): Boolean =
+        try {
+            File(fileName).delete()
+        } catch (error: SecurityException) {
+            Log.w("FileUtils", "Cannot delete $fileName", error)
+            false
+        }
+
+    @JvmStatic
+    fun rename(srcPath: String, dstPath: String): Boolean =
+        try {
+            File(srcPath).renameTo(File(dstPath))
+        } catch (error: SecurityException) {
+            Log.w("FileUtils", "Cannot rename $srcPath", error)
+            false
+        }
 }
-
-/*
- * Checks whether the given file is writable
- *
- * @return true if writable, false if not
- */
-fun isFileWritable(fileName: String): Boolean {
-    val file = File(fileName)
-    return file.exists() && file.canWrite()
-}
-
-/*
- * Deletes an existing file
- *
- * @return true if the delete was successful, false if not
- */
-fun delete(fileName: String): Boolean =
-    runCatching { File(fileName).delete() }
-        .onFailure { e -> Log.w(TAG, "Failed to delete $fileName", e) }
-        .getOrDefault(false)
-
-/*
- * Renames an existing file
- *
- * @return true if the rename was successful, false if not
- */
-fun rename(srcPath: String, dstPath: String): Boolean =
-    runCatching { File(srcPath).renameTo(File(dstPath)) }
-        .onFailure { e -> Log.w(TAG, "Failed to rename $srcPath to $dstPath", e) }
-        .getOrDefault(false)

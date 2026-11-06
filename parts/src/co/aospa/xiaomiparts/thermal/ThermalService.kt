@@ -1,98 +1,145 @@
 /*
- * SPDX-FileCopyrightText: 2020 The LineageOS Project
- * SPDX-FileCopyrightText: 2025 Paranoid Android
+ * Copyright (C) 2020 The LineageOS Project
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package co.aospa.xiaomiparts.thermal
 
-import android.app.ActivityTaskManager
-import android.app.Service
-import android.app.TaskStackListener
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.IBinder
-import co.aospa.xiaomiparts.utils.dlog
+import android.app.*
+import android.content.*
+import android.os.*
+import android.util.Log
 
-/** Service to monitor current top (foreground) app and set thermal profile accordingly. */
-class ThermalService : Service() {
-
-    private lateinit var thermalUtils: ThermalUtils
-
-    private var currentApp = ""
-        set(value) {
-            if (field == value) return
-            field = value
-            dlog(TAG, "Top app changed: $value")
-            setThermalProfile()
-        }
-
-    private var screenOn = true
-        set(value) {
-            if (field == value) return
-            field = value
-            dlog(TAG, "Screen state changed: $value")
-            setThermalProfile()
-        }
-
-    private val taskListener =
+class ThermalService : android.app.Service() {
+    private val handler = Handler(Looper.getMainLooper())
+    @Volatile private var destroyed = false
+    private var screenOn = false
+    private var receiverRegistered = false
+    private var listenerRegistered = false
+    private var previous = ""
+    private var retryCount = 0
+    private val retry = Runnable { foreground(true) }
+    private lateinit var utils: ThermalUtils
+    private var tasks: IActivityTaskManager? = null
+    private val refresh = Runnable { foreground(false) }
+    private val listener =
         object : TaskStackListener() {
             override fun onTaskStackChanged() {
-                runCatching {
-                    val focusedTask = ActivityTaskManager.getService().focusedRootTaskInfo
-                    focusedTask?.topActivity?.let { currentApp = it.packageName }
+                if (!destroyed) {
+                    handler.removeCallbacks(refresh)
+                    handler.post(refresh)
                 }
             }
         }
-
-    private val intentReceiver =
+    private val receiver =
         object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                when (intent.action) {
-                    Intent.ACTION_SCREEN_OFF -> screenOn = false
-                    Intent.ACTION_SCREEN_ON -> screenOn = true
+            override fun onReceive(context: Context, intent: Intent?) {
+                if (destroyed) return
+                when (intent?.action) {
+                    Intent.ACTION_SCREEN_OFF -> {
+                        screenOn = false
+                        previous = ""
+                        recordApply(restoreDefault())
+                    }
+                    Intent.ACTION_SCREEN_ON -> {
+                        screenOn = true
+                        foreground(true)
+                    }
                 }
             }
         }
 
     override fun onCreate() {
-        dlog(TAG, "Creating service")
-        thermalUtils = ThermalUtils.getInstance(this)
         super.onCreate()
-    }
-
-    override fun onDestroy() {
-        dlog(TAG, "Destroying service")
-        unregisterReceiver(intentReceiver)
-        runCatching { ActivityTaskManager.getService().unregisterTaskStackListener(taskListener) }
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        dlog(TAG, "Starting service")
-        runCatching { ActivityTaskManager.getService().registerTaskStackListener(taskListener) }
+        utils = ThermalUtils(this)
+        tasks = ActivityTaskManager.getService()
+        screenOn = getSystemService(PowerManager::class.java)?.isInteractive == true
         registerReceiver(
-            intentReceiver,
+            receiver,
             IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_OFF)
                 addAction(Intent.ACTION_SCREEN_ON)
             },
+            Context.RECEIVER_NOT_EXPORTED,
         )
+        receiverRegistered = true
+        try {
+            tasks?.let {
+                it.registerTaskStackListener(listener)
+                listenerRegistered = true
+            }
+        } catch (error: Exception) {
+            Log.w("ThermalService", "Cannot register task listener", error)
+        }
+        foreground(true)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        foreground(true)
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun setThermalProfile() {
-        if (screenOn) {
-            thermalUtils.setThermalProfile(currentApp)
-        } else {
-            thermalUtils.setDefaultThermalProfile()
+    override fun onDestroy() {
+        destroyed = true
+        handler.removeCallbacks(refresh)
+        handler.removeCallbacks(retry)
+        if (receiverRegistered)
+            try {
+                unregisterReceiver(receiver)
+            } catch (error: RuntimeException) {
+                Log.w("ThermalService", "Cannot unregister receiver", error)
+            }
+        if (listenerRegistered)
+            try {
+                tasks?.unregisterTaskStackListener(listener)
+            } catch (error: Exception) {
+                Log.w("ThermalService", "Cannot unregister task listener", error)
+            }
+        restoreDefault()
+        super.onDestroy()
+    }
+
+    private fun restoreDefault(): Boolean {
+        utils.resetTouchModes()
+        return utils.setDefaultThermalProfile()
+    }
+
+    private fun recordApply(applied: Boolean) {
+        handler.removeCallbacks(retry)
+        if (applied) {
+            retryCount = 0
+        } else if (!destroyed && retryCount < 3) {
+            retryCount++
+            handler.postDelayed(retry, 1000)
         }
     }
 
-    companion object {
-        private const val TAG = "ThermalService"
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (!destroyed) utils.updateTouchRotation()
+    }
+
+    private fun foreground(force: Boolean) {
+        if (destroyed) return
+        if (!screenOn) {
+            previous = ""
+            recordApply(restoreDefault())
+            return
+        }
+        val packageName =
+            try {
+                tasks?.focusedRootTaskInfo?.topActivity?.packageName ?: ""
+            } catch (error: Exception) {
+                Log.w("ThermalService", "Cannot query foreground", error)
+                previous = ""
+                recordApply(restoreDefault())
+                return
+            }
+        if (!force && previous == packageName) return
+        val applied =
+            if (packageName.isEmpty()) restoreDefault() else utils.setThermalProfile(packageName)
+        previous = if (applied) packageName else ""
+        recordApply(applied)
     }
 }
