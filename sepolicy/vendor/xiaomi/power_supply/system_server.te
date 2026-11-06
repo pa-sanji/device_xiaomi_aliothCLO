@@ -1,0 +1,6 @@
+# PowerInsightService runs inside system_server and samples the raw battery
+# sysfs nodes (current, voltage, temperature, charge_full, cycle_count) for
+# the Power Insight battery-health UI and charge alarms. The health HAL does
+# not expose all of these fields, so grant read-only access to the vendor
+# battery supply nodes.
+allow system_server vendor_sysfs_battery_supply:file r_file_perms;
