@@ -44,6 +44,23 @@ on boot
 
     chown system system /sys/class/touch/touch_dev/palm_sensor
     chown system system /sys/class/thermal/thermal_message/sconfig
+
+    # XiaomiParts display
+    chown system system /sys/devices/platform/soc/soc:qcom,dsi-display-primary/msm_fb_ea_enable
+    chmod 0660 /sys/devices/platform/soc/soc:qcom,dsi-display-primary/msm_fb_ea_enable
+    chown system system /sys/devices/platform/soc/soc:qcom,dsi-display-primary/hbm
+    chmod 0660 /sys/devices/platform/soc/soc:qcom,dsi-display-primary/hbm
+    chown system system /sys/class/backlight/panel0-backlight/brightness
+    chown system system /sys/class/backlight/panel0-backlight/max_brightness
+
+    # XiaomiParts touch sampling
+    chown system system /sys/devices/virtual/touch/touch_dev/bump_sample_rate
+    chmod 0660 /sys/devices/virtual/touch/touch_dev/bump_sample_rate
+
+    # Xiaomi touch device
+    chown system system /dev/xiaomi-touch
+    chmod 0660 /dev/xiaomi-touch
+
     copy  /vendor/etc/tunings.txt /mnt/vendor/persist/vpp/tunings.txt
     mkdir /mnt/vendor/persist/camera 0755 system cameraserver
     write /sys/block/sda/queue/wbt_lat_usec 75000

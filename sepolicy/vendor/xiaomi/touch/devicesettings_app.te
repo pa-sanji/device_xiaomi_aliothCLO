@@ -1,0 +1,14 @@
+# Display sysfs for DC dimming and HBM
+allow devicesettings_app vendor_sysfs_graphics:file write;
+r_dir_file(devicesettings_app, vendor_sysfs_graphics);
+allow devicesettings_app vendor_sysfs_graphics:file rw_file_perms;
+
+# Touch sampling rate
+allow devicesettings_app sysfs_htsr:file rw_file_perms;
+
+# Touchfeature HAL (per-app touch controls are hidden if the service is absent)
+allow devicesettings_app hal_touchfeature_xiaomi_hwservice:hwservice_manager find;
+binder_call(devicesettings_app, hal_touchfeature_xiaomi_default);
+
+# MiSound checks the HAL Hi-Fi capability before exposing its control
+get_prop(devicesettings_app, vendor_audio_prop);
