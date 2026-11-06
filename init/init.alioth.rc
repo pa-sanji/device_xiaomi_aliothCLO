@@ -34,14 +34,9 @@ on post-fs-data
     mkdir /data/vendor/thermal/config 0771 root system
 
 on boot
-    # Double Tap Sensor
-    chown system system /sys/devices/platform/soc/990000.spi/spi_master/spi1/spi1.0/double_tap_pressed
-    chmod 0660 /sys/devices/platform/soc/990000.spi/spi_master/spi1/spi1.0/double_tap_pressed
-
-    # Single Tap Sensor
-    chown system system /sys/devices/platform/soc/990000.spi/spi_master/spi1/spi1.0/single_tap_pressed
-    chmod 0660 /sys/devices/platform/soc/990000.spi/spi_master/spi1/spi1.0/single_tap_pressed
-
+    write /sys/touchpanel/double_tap 1
+    chown system system /sys/touchpanel/double_tap
+    chmod 0660 /sys/touchpanel/double_tap
     chown system system /sys/class/touch/touch_dev/palm_sensor
     chown system system /sys/class/thermal/thermal_message/sconfig
 
