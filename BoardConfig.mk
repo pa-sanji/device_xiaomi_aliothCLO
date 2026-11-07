@@ -84,7 +84,8 @@ TARGET_TAP_TO_WAKE_NODE := "/sys/touchpanel/double_tap"
 # HIDL
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
     $(DEVICE_PATH)/configs/vintf/xiaomi_vendor_framework_compatibility_matrix.xml \
-    $(HARDWARE_PATH)/vintf/xiaomi_framework_compatibility_matrix.xml
+    $(HARDWARE_PATH)/vintf/xiaomi_framework_compatibility_matrix.xml \
+    hardware/dolby/dolby_framework_matrix.xml
 
 DEVICE_MANIFEST_FILE += \
     $(DEVICE_PATH)/configs/vintf/manifest.xml \
@@ -180,5 +181,7 @@ TARGET_USERIMAGES_USE_F2FS := true
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += hardware/samsung-ext/interfaces/sepolicy/private
 SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += hardware/samsung-ext/interfaces/sepolicy/public
 
-# Explicit framework opt-in for the Qualcomm DAX 3.6 effect contract.
-$(call soong_config_set_bool,audio,legacy_dap_integration,true)
+# Dolby (Tsaritsa audio stack)
+BOARD_VENDOR_SEPOLICY_DIRS += \
+    hardware/dolby/sepolicy/vendor \
+    hardware/dolby/sepolicy/vendor/aidl

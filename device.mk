@@ -15,6 +15,9 @@
 # A/B
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/launch_with_vendor_ramdisk.mk)
 
+# Alioth uses the AW8697 legacy input-effect ABI.
+TARGET_USES_AW8697_VIBRATOR := true
+
 # Debug tools (boot logger, dlopener, strace)
 $(call inherit-product, hardware/samsung-ext/interfaces/debug-tools/debug.mk)
 
@@ -208,28 +211,10 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/audio_effects.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.xml \
     $(LOCAL_PATH)/configs/audio/audio_io_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_io_policy.conf
 
-# Dolby
-# Xiaomi QDSP DAP integration, ported from PocoF3Releases (device_xiaomi_sm8250-common
-# aosp-17 and hardware_xiaomi cnb). The MIUI primary HAL drives the ADSP DAP module
-# already present in the vendor tree (vendor/lib/rfsa/adsp/capi_v2_dap_cpdp.so); the
-# DMS HAL exposes the QDSP effect parameters to AudioFlinger through the "dap" effect,
-# and XiaomiDolby is the system app that controls it.
-include hardware/xiaomi/dolby/dolby.mk
-
-PRODUCT_PACKAGES += \
-    DSPVolumeSynchronizer \
-    XiaomiDolby \
-    libstagefright_foundation-v33.vendor
-
-PRODUCT_VENDOR_PROPERTIES += \
-    ro.vendor.audio.dolby.dap.control=qdsp \
-    ro.vendor.audio.dolby.dax.support=true \
-    ro.vendor.audio.dolby.dax.version=DAX3_3.6 \
-    ro.vendor.audio.dolby.spatializer.support?=false \
-    ro.vendor.audio.dolby.speaker_tuning.support?=false \
-    ro.vendor.audio.dolby.surround.enable=true \
-    ro.vendor.dolby.dax.version=DAX3_3.6.1.6_r1 \
-    vendor.audio.dolby.control.tunning.by.volume.support?=false
+# Dolby (Tsaritsa audio stack, Stage 1)
+# The software DAP (libswdap) replaces the QDSP libhwdap effect. The Dolby Vision
+# and C2 parts of hardware/dolby are intentionally not included yet.
+include $(LOCAL_PATH)/dolby-stage1.mk
 
 # Battery
 PRODUCT_SYSTEM_PROPERTIES += \
@@ -754,12 +739,6 @@ PRODUCT_PRODUCT_PROPERTIES += \
     persist.sys.fuse.passthrough.enable=true
 
 # Thermal
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/thermal/thermal-india-mgame.conf:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-india-mgame.conf \
-    $(LOCAL_PATH)/configs/thermal/thermal-india-tgame.conf:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-india-tgame.conf \
-    $(LOCAL_PATH)/configs/thermal/thermal-mgame.conf:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-mgame.conf \
-    $(LOCAL_PATH)/configs/thermal/thermal-tgame.conf:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-tgame.conf
-
 PRODUCT_VENDOR_PROPERTIES += \
     vendor.sys.thermal.data.path=/data/vendor/thermal/
 
@@ -780,7 +759,15 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.verified_boot.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.verified_boot.xml
 
 # Vibrator
+ifeq ($(TARGET_USES_AW8697_VIBRATOR),true)
+PRODUCT_PACKAGES += \
+    android.hardware.vibrator-service.xiaomi_aw8697
+
+PRODUCT_COPY_FILES += \
+    vendor/qcom/opensource/vibrator/excluded-input-devices.xml:$(TARGET_COPY_OUT_VENDOR)/etc/excluded-input-devices.xml
+else
 $(call inherit-product, hardware/xiaomi/aidl/vibrator/vibrator-vendor-product.mk)
+endif
 
 # VNDK
 PRODUCT_PACKAGES += \

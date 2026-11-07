@@ -79,6 +79,10 @@ function blob_fixup() {
             [ "$2" = "" ] && return 0
             python3 "${MY_DIR}/mius_poll_fixup.py" "${2}"
             ;;
+        vendor/etc/vibrator/primitive_effect_1.bin|vendor/etc/vibrator/primitive_effect_2.bin|vendor/etc/vibrator/primitive_effect_7.bin)
+            [ "$2" = "" ] && return 0
+            python3 "${MY_DIR}/aw8697_waveform_fixup.py" "${2}"
+            ;;
         *)
             return 1
             ;;

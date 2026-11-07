@@ -7,65 +7,23 @@ package co.aospa.xiaomiparts.thermal
 import android.content.Context
 import android.content.Intent
 import android.hardware.display.DisplayManager
-import android.os.*
+import android.os.RemoteException
 import android.util.Log
 import android.view.Display
 import co.aospa.xiaomiparts.touchsampling.TouchSamplingUtils
-import co.aospa.xiaomiparts.utils.FileUtils
 import co.aospa.xiaomiparts.utils.PartsPreferences
 import vendor.xiaomi.hardware.touchfeature.V1_0.ITouchFeature
 
+/**
+ * Per-app touch profile helper. Thermal policy itself is owned by the vendor
+ * mi_thermald daemon; this class must never write the thermal sconfig node.
+ */
 class ThermalUtils(context: Context) {
     companion object {
-        const val STATE_DEFAULT = 0
-        private const val SCONFIG = "/sys/class/thermal/thermal_message/sconfig"
-        private const val MAP = "persist.sys.xiaomi.thermal.map"
-        private val PREFIXES =
-            listOf(
-                "thermal.benchmark=",
-                "thermal.browser=",
-                "thermal.camera=",
-                "thermal.dialer=",
-                "thermal.gaming=",
-                "thermal.streaming=",
-                "thermal.navigation=",
-                "thermal.alt_gaming=",
-                "thermal.per_normal=",
-                "thermal.per_class0=",
-                "thermal.per_navigation=",
-                "thermal.per_video=",
-                "thermal.normal=",
-            )
-
         @JvmStatic
         fun startService(context: Context) {
-            ensureRegion()
-            if (FileUtils.isFileWritable(SCONFIG))
-                context.startService(Intent(context, ThermalService::class.java))
+            context.startService(Intent(context, ThermalService::class.java))
         }
-
-        fun ensureRegion() {
-            val map = SystemProperties.get(MAP, "")
-            if (map == "global" || (map == "india" && isIndiaMapAvailable())) return
-            val hw = SystemProperties.get("ro.boot.hwversion", "")
-            val india =
-                listOf("9.21", "9.22", "9.29").any { hw.startsWith(it) } && isIndiaMapAvailable()
-            try {
-                SystemProperties.set(MAP, if (india) "india" else "global")
-            } catch (error: RuntimeException) {
-                Log.w("ThermalUtils", "Cannot initialize thermal map", error)
-            }
-        }
-
-        fun isIndiaMapAvailable() = FileUtils.fileExists("/vendor/etc/thermal-map-india.conf")
-
-        fun getCurrentSconfig(): Int? =
-            FileUtils.readOneLine(SCONFIG)?.trim()?.toIntOrNull()?.takeIf { it >= 0 }
-
-        fun getSelectedRegion() =
-            if (SystemProperties.get(MAP, "") == "india" && isIndiaMapAvailable())
-                ThermalProfiles.REGION_INDIA
-            else ThermalProfiles.REGION_GLOBAL
 
         private fun touchFeature(): ITouchFeature? =
             try {
@@ -83,101 +41,9 @@ class ThermalUtils(context: Context) {
     private var hal = touchFeature()
     private var touchChanged = false
 
-    fun setSelectedRegion(region: Int): Boolean {
-        if (region != ThermalProfiles.REGION_GLOBAL && region != ThermalProfiles.REGION_INDIA)
-            return false
-        if (region == ThermalProfiles.REGION_INDIA && !isIndiaMapAvailable()) return false
-        val value = if (region == ThermalProfiles.REGION_INDIA) "india" else "global"
-        try {
-            SystemProperties.set(MAP, value)
-        } catch (error: RuntimeException) {
-            Log.w("ThermalUtils", "Cannot change thermal map", error)
-            return false
-        }
-        Handler(Looper.getMainLooper()).postDelayed({ startService(app) }, 350)
-        return SystemProperties.get(MAP, "") == value
-    }
-
-    fun getBaseSconfig(): Int =
-        prefs.getInt("thermal_base_sconfig", 0).let {
-            if (ThermalProfiles.findBySconfig(getSelectedRegion(), it) != null) it else 0
-        }
-
-    fun setBaseSconfig(sconfig: Int): Boolean {
-        if (ThermalProfiles.findBySconfig(getSelectedRegion(), sconfig) == null) return false
-        prefs.edit().putInt("thermal_base_sconfig", sconfig).apply()
-        startService(app)
-        return true
-    }
-
-    private fun writeValue(value: List<String>) {
-        prefs.edit().putString("thermal_control", value.joinToString(":")).apply()
-    }
-
-    private fun getValue(): List<String> {
-        val saved = prefs.getString("thermal_control", null)?.split(':')
-        if (
-            saved != null &&
-                saved.isNotEmpty() &&
-                saved.size <= PREFIXES.size &&
-                saved.indices.all { saved[it].startsWith(PREFIXES[it]) }
-        ) {
-            return (saved + PREFIXES.drop(saved.size)).also {
-                if (saved.size != PREFIXES.size) writeValue(it)
-            }
-        }
-        return PREFIXES.also { writeValue(it) }
-    }
-
-    fun writePackage(packageName: String, state: Int) {
-        if (
-            packageName.isEmpty() ||
-                (state != STATE_DEFAULT &&
-                    ThermalProfiles.findByStorageState(getSelectedRegion(), state) == null)
-        )
-            return
-        val modes =
-            getValue()
-                .map { profile ->
-                    profile.substringBefore('=') +
-                        "=" +
-                        profile
-                            .substringAfter('=')
-                            .split(',')
-                            .filter { it.isNotEmpty() && it != packageName }
-                            .joinToString(",")
-                            .let { if (it.isEmpty()) "" else "$it," }
-                }
-                .toMutableList()
-        if (state in 1..PREFIXES.size) modes[state - 1] += "$packageName,"
-        writeValue(modes)
-        startService(app)
-    }
-
-    fun getStateForPackage(packageName: String): Int {
-        if (packageName.isEmpty()) return STATE_DEFAULT
-        val index = getValue().indexOfFirst { packageName in it.substringAfter('=').split(',') }
-        return if (index < 0) STATE_DEFAULT else index + 1
-    }
-
-    private fun writeThermalState(state: Int): Boolean {
-        val applied = FileUtils.writeLine(SCONFIG, state.toString())
-        if (!applied) Log.w("ThermalUtils", "Cannot write thermal state $state")
-        return applied
-    }
-
-    fun setDefaultThermalProfile(): Boolean = writeThermalState(getBaseSconfig())
-
-    fun setThermalProfile(packageName: String): Boolean {
-        val state = getStateForPackage(packageName)
-        val target =
-            if (state == STATE_DEFAULT) getBaseSconfig()
-            else
-                ThermalProfiles.findByStorageState(getSelectedRegion(), state)?.sconfig
-                    ?: getBaseSconfig()
-        val applied = writeThermalState(target)
+    fun applyTouchProfile(packageName: String): Boolean {
         updateTouchModes(packageName)
-        return applied
+        return true
     }
 
     private fun updateTouchModes(packageName: String) {

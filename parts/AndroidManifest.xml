@@ -117,38 +117,6 @@
                        android:value="true" />
         </service>
 
-        <activity
-            android:name=".thermal.ThermalInfoActivity"
-            android:exported="false"
-            android:label="@string/thermal_info_title"
-            android:theme="@style/Theme.XiaomiParts" />
-
-        <activity
-            android:name=".thermal.ThermalActivity"
-            android:exported="false"
-            android:label="@string/thermal_title"
-            android:theme="@style/Theme.XiaomiParts">
-            <intent-filter>
-                <action android:name="com.android.settings.action.IA_SETTINGS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="com.android.settings.category"
-                android:value="com.android.settings.category.ia.system" />
-            <meta-data
-                android:name="com.android.settings.icon"
-                android:resource="@drawable/ic_settings_thermal" />
-            <meta-data
-                android:name="com.android.settings.icon_tintable"
-                android:value="true" />
-            <meta-data
-                android:name="com.android.settings.order"
-                android:value="-255" />
-	    <meta-data
-                android:name="com.android.settings.summary"
-                android:resource="@string/thermal_summary" />
-        </activity>
-
         <service
             android:name=".RefreshRateTileService"
             android:exported="true"

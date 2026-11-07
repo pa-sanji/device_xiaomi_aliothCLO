@@ -102,7 +102,7 @@ class ThermalService : android.app.Service() {
 
     private fun restoreDefault(): Boolean {
         utils.resetTouchModes()
-        return utils.setDefaultThermalProfile()
+        return true
     }
 
     private fun recordApply(applied: Boolean) {
@@ -138,7 +138,7 @@ class ThermalService : android.app.Service() {
             }
         if (!force && previous == packageName) return
         val applied =
-            if (packageName.isEmpty()) restoreDefault() else utils.setThermalProfile(packageName)
+            if (packageName.isEmpty()) restoreDefault() else utils.applyTouchProfile(packageName)
         previous = if (applied) packageName else ""
         recordApply(applied)
     }
