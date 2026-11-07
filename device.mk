@@ -72,14 +72,13 @@ PRODUCT_PACKAGES += \
     libqcomvisualizer \
     libqcomvoiceprocessing
 
-# HIDL service + impls, kept explicit so the 32-bit legacy HAL wrapper is
-# always packaged at the path init expects (audio.primary.kona itself comes
-# from qti-audio.mk -> configs/kona/kona.mk).
+# HIDL service + impls. The primary HAL is the stock Xiaomi blob installed as
+# audio.primary.kona.so by alioth-vendor.mk; the source audio.primary.kona is
+# excluded for alioth so the effect and the service share the same HAL.
 PRODUCT_PACKAGES += \
     android.hardware.audio@6.0-impl \
     android.hardware.audio.effect@6.0-impl \
-    android.hardware.audio.service \
-    audio.primary.kona
+    android.hardware.audio.service
 
 # The prebuilt primary HAL (vendor/lib/hw/audio.primary.alioth.so) has a hard
 # DT_NEEDED on libaudioroute-v34.so, the VNDK-34 flavoured audioroute:
@@ -99,7 +98,7 @@ PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.audio.ring.filter.mask=0 \
     ro.audio.monitorRotation=true \
     ro.config.vc_call_vol_steps=11 \
-    ro.hardware.audio.primary=alioth \
+    ro.hardware.audio.primary=kona \
     ro.vendor.audio.enhance.support=false \
     ro.vendor.audio.gain.support=true \
     ro.vendor.audio.karaok.support=true \
