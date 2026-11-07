@@ -185,3 +185,6 @@ SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += hardware/samsung-ext/interfaces/sepolicy/publ
 BOARD_VENDOR_SEPOLICY_DIRS += \
     hardware/dolby/sepolicy/vendor \
     hardware/dolby/sepolicy/vendor/aidl
+
+# GameBar
+BOARD_VENDOR_SEPOLICY_DIRS += packages/apps/GameBar/sepolicy/vendor

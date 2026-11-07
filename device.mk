@@ -216,6 +216,9 @@ PRODUCT_COPY_FILES += \
 # and C2 parts of hardware/dolby are intentionally not included yet.
 include $(LOCAL_PATH)/dolby-stage1.mk
 
+# GameBar
+$(call inherit-product, packages/apps/GameBar/gamebar.mk)
+
 # Battery
 PRODUCT_SYSTEM_PROPERTIES += \
     ro.config.small_battery=true
