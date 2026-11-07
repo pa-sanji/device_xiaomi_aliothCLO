@@ -359,7 +359,10 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     debug.sf.treat_170m_as_sRGB=1 \
     debug.sf.hwc_hotplug_error_via_neg_vsync=1 \
     debug.sf.hwc_hdcp_via_neg_vsync=1 \
-    ro.surface_flinger.enable_layer_caching=false
+    ro.surface_flinger.enable_layer_caching=false \
+    debug.sf.enable_adpf_cpu_hint=true \
+    debug.hwui.use_hint_manager=true \
+    debug.hwui.target_cpu_time_percent=50
 
 # NOTE: do not set ro.config.avoid_gfx_accel=true here. ActivityManager
 # .isHighEndGfx() returns false when it is set, which makes SystemUI's
