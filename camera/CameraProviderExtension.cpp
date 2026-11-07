@@ -12,7 +12,7 @@
 using ::android::base::ReadFileToString;
 using ::android::base::WriteStringToFile;
 
-static const std::string kToggleSwitch = "/sys/class/leds/led:switch_0/brightness";
+static const std::string kToggleSwitch = "/sys/class/leds/led:switch_2/brightness";
 static const std::string kTorchBrightnessNodes[] = {
     "/sys/class/leds/led:torch_0/brightness",
     "/sys/class/leds/led:torch_1/brightness"
