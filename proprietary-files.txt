@@ -104,6 +104,8 @@ vendor/etc/acdbdata/Forte/Forte_Speaker_cal.acdb|374dd9c6a64781c1768177411506cd5
 vendor/etc/acdbdata/Forte/Forte_workspaceFile.qwsp|f52ee13837b2f8a048db39a96fd8e466fe7f4971
 vendor/etc/acdbdata/adsp_avs_config.acdb|51f049b97e1d0b56faa1cf3713682899f7522c1a
 vendor/lib/hw/audio.primary.kona.so:vendor/lib/hw/audio.primary.alioth.so;FIX_SONAME|7a028dea19463661429e2bbc3307cee72b1610bf
+vendor/lib/soundfx/libvolumelistener.so|91db8a95ed2af21f36921c39e77bc2c4e6bbc059
+vendor/lib64/soundfx/libvolumelistener.so|1e8cfc7223b33754820ac625f9c1f09b78ec648f
 vendor/lib/hw/sound_trigger.primary.kona.so|a5baa2d64c31b1dd932bc708c62b70cf6678a651
 vendor/lib/hw/vendor.qti.hardware.audiohalext@1.0-impl.so|ee89b7cb4e0476688ac8c1a669dfe89c660b1a76
 vendor/lib/vndk/libxlog.so|dad5169deb3296ca1ff4d7e9546e4229cda277b9

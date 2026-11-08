@@ -70,19 +70,31 @@ PRODUCT_COPY_FILES += \
 # vauxite): the MIUI prebuilt primary HAL from proprietary_vendor_xiaomi plus
 # the qti kona audio configuration, with the platform audio component (qti
 # audio) providing the HIDL service, effect modules and policy copies.
+#
+# alioth keeps the stock MIUI alioth HAL installed as audio.primary.kona.so
+# by proprietary-files.txt. Do not build the source audio.primary.kona: it is
+# a different HAL copy, so libvolumelistener dlopen()s it and sees adev ==
+# NULL. TARGET_USES_STOCK_AUDIO_HAL makes kona.mk skip the source HAL and
+# qti-audio.mk skip the source libvolumelistener.
+TARGET_USES_STOCK_AUDIO_HAL := true
+
 PRODUCT_PACKAGES += \
     libqcompostprocbundle \
     libqcomvisualizer \
     libqcomvoiceprocessing
 
-# HIDL service + impls, kept explicit so the 32-bit legacy HAL wrapper is
-# always packaged at the path init expects (audio.primary.kona itself comes
-# from qti-audio.mk -> configs/kona/kona.mk).
+# 32-bit no-op perf client for the 32-bit audio HAL (AOSP parity). The QTI
+# perf component only ships the 64-bit AIDL client, so the audio HAL's
+# dlopen("libqti-perfd-client.so") failed with "Failed to open perf handle".
+PRODUCT_PACKAGES += \
+    libqti-perfd-client-32
+
+# HIDL service + impls. The primary HAL is the stock alioth blob installed as
+# audio.primary.kona.so by the vendor tree.
 PRODUCT_PACKAGES += \
     android.hardware.audio@6.0-impl \
     android.hardware.audio.effect@6.0-impl \
-    android.hardware.audio.service \
-    audio.primary.kona
+    android.hardware.audio.service
 
 # The prebuilt primary HAL (vendor/lib/hw/audio.primary.alioth.so) has a hard
 # DT_NEEDED on libaudioroute-v34.so, the VNDK-34 flavoured audioroute:
@@ -94,7 +106,17 @@ PRODUCT_PACKAGES += \
 # hardware/lineage/compat provides that module (prebuilt vndk/v34). Without it
 # the linker cannot load the blob; nothing else pulls it in automatically.
 PRODUCT_PACKAGES += \
-    libaudioroute-v34
+    libaudioroute-v34 \
+    libaudioutils
+
+# The generated alioth-vendor.mk has not been regenerated for these blobs yet.
+# Install the stock alioth HAL as audio.primary.kona.so (the blob's SONAME is
+# already audio.primary.kona.so) and the matching stock libvolumelistener, so
+# the audio service and the volume listener load the same HAL copy.
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/alioth/proprietary/vendor/lib/hw/audio.primary.alioth.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/audio.primary.kona.so \
+    vendor/xiaomi/alioth/proprietary/vendor/lib/soundfx/libvolumelistener.so:$(TARGET_COPY_OUT_VENDOR)/lib/soundfx/libvolumelistener.so \
+    vendor/xiaomi/alioth/proprietary/vendor/lib64/soundfx/libvolumelistener.so:$(TARGET_COPY_OUT_VENDOR)/lib64/soundfx/libvolumelistener.so
 
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.audio.delta.refresh=true \
@@ -102,7 +124,7 @@ PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.audio.ring.filter.mask=0 \
     ro.audio.monitorRotation=true \
     ro.config.vc_call_vol_steps=11 \
-    ro.hardware.audio.primary=alioth \
+    ro.hardware.audio.primary=kona \
     ro.vendor.audio.enhance.support=false \
     ro.vendor.audio.gain.support=true \
     ro.vendor.audio.karaok.support=true \

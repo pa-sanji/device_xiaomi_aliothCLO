@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: Apache-2.0
+//
+// 32-bit no-op libqti-perfd-client for the 32-bit audio HAL.
+//
+// The stock 32-bit audio HAL dlopen()s libqti-perfd-client.so to acquire its
+// KPI perf lock. The QTI perf component only ships a 64-bit client, so the
+// 32-bit dlopen() failed and the HAL logged:
+//
+//   audio_extn_perf_lock_init: Failed to open perf handle
+//   audio_extn_perf_lock_acquire: Incorrect params
+//
+// This is the same no-op stub LineageOS builds for its 32-bit HALs. It lets
+// the HAL proceed without changing the QTI power HAL or the 64-bit perf stack.
+
+cc_library_shared {
+    name: "libqti-perfd-client-32",
+    stem: "libqti-perfd-client",
+    srcs: ["client.c"],
+    vendor: true,
+    compile_multilib: "32",
+    cflags: [
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+    ],
+}
