@@ -18,6 +18,9 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/launch_with_ven
 # Alioth uses the AW8697 legacy input-effect ABI.
 TARGET_USES_AW8697_VIBRATOR := true
 
+#Signing keys
+$(call inherit-product, vendor/evolution-priv/keys/keys.mk)
+
 # Debug tools (boot logger, dlopener, strace)
 $(call inherit-product, hardware/samsung-ext/interfaces/debug-tools/debug.mk)
 
