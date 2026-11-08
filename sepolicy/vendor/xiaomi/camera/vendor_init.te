@@ -1,2 +1,5 @@
 # vendor_init writes persist.vendor.camera.* from /vendor/build.prop.
 set_prop(vendor_init, vendor_camera_prop)
+# persist.vendor.camera.privapp.list is labelled vendor_persist_camera_prop
+# by the Qualcomm property contexts, not by the generic camera type.
+set_prop(vendor_init, vendor_persist_camera_prop)
