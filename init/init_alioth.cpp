@@ -54,6 +54,9 @@ void load_redmi_k40() {
     property_override("ro.product.manufacturer", "Xiaomi");
     property_override("ro.product.model", "M2012K11AC");
     property_override("ro.product.name", "alioth");
+    // This variant has the NXP NFC chip: load sku_nfc permissions and
+    // enable the NFC HAL.
+    property_override("ro.boot.product.hardware.sku", "nfc");
 }
 
 void load_poco_f3() {
@@ -63,6 +66,9 @@ void load_poco_f3() {
     property_override("ro.product.manufacturer", "Xiaomi");
     property_override("ro.product.model", "M2012K11AG");
     property_override("ro.product.name", "alioth");
+    // This variant has the NXP NFC chip: load sku_nfc permissions and
+    // enable the NFC HAL.
+    property_override("ro.boot.product.hardware.sku", "nfc");
 }
 
 void load_xiaomi_mi11x() {

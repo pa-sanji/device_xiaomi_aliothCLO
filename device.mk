@@ -550,11 +550,18 @@ PRODUCT_PACKAGES += \
     android.system.net.netd@1.1.vendor
 
 # NFC
+# The NXP chip is only present on the POCO F3 (alioth_global) and Redmi K40
+# (alioth). The Mi 11X (aliothin) reports sku=std and must not advertise any
+# NFC/secure-element feature, otherwise NfcNci starts and blocks forever in
+# INfc::getService() waiting for a HAL that init keeps disabled.
+# libinit sets ro.boot.product.hardware.sku=nfc on the NFC variants; the
+# permission XMLs are only picked up from the sku_nfc directory on those.
+# NfcNci itself comes from the com.android.nfcservices APEX; adding it here as
+# well makes PackageManager skip the APEX copy as a duplicate.
 PRODUCT_PACKAGES += \
     android.hardware.nfc-service.nxp \
     com.android.nfc_extras \
     libchrome.vendor \
-    NfcNci \
     Tag \
     se_nq_extn_client \
     ls_nq_client \
@@ -563,11 +570,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_SYSTEM_PROPERTIES += \
     ro.nfc.port=I2C
 
-ifneq ($(TARGET_NFC_SKU),)
-NFC_PERMISSIONS_DIR := $(TARGET_COPY_OUT_ODM)/etc/permissions/sku_$(TARGET_NFC_SKU)
-else
-NFC_PERMISSIONS_DIR := $(TARGET_COPY_OUT_VENDOR)/etc/permissions
-endif
+NFC_PERMISSIONS_DIR := $(TARGET_COPY_OUT_ODM)/etc/permissions/sku_nfc
 
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(LOCAL_PATH)/configs/nfc/,$(TARGET_COPY_OUT_VENDOR)/etc) \
@@ -579,7 +582,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.se.omapi.ese.xml:$(NFC_PERMISSIONS_DIR)/android.hardware.se.omapi.ese.xml \
     frameworks/native/data/etc/android.hardware.se.omapi.uicc.xml:$(NFC_PERMISSIONS_DIR)/android.hardware.se.omapi.uicc.xml \
     frameworks/native/data/etc/com.android.nfc_extras.xml:$(NFC_PERMISSIONS_DIR)/com.android.nfc_extras.xml \
-    frameworks/native/data/etc/com.nxp.mifare.xml:$(TARGET_COPY_OUT_ODM)/etc/permissions/com.nxp.mifare.xml
+    frameworks/native/data/etc/com.nxp.mifare.xml:$(NFC_PERMISSIONS_DIR)/com.nxp.mifare.xml
 
 # Overlays
 PRODUCT_PACKAGES += \
@@ -678,8 +681,6 @@ TARGET_COMMON_QTI_COMPONENTS := \
     usb \
     wfd \
     wlan
-
-TARGET_NFC_SKU := pro
 
 # RCS
 PRODUCT_PROPERTY_OVERRIDES += \

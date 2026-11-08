@@ -91,9 +91,9 @@ DEVICE_MANIFEST_FILE += \
     $(DEVICE_PATH)/configs/vintf/manifest.xml \
     $(DEVICE_PATH)/configs/vintf/xiaomi_manifest.xml
 
-ODM_MANIFEST_SKUS := pro
+ODM_MANIFEST_SKUS := nfc
 
-ODM_MANIFEST_PRO_FILES := \
+ODM_MANIFEST_NFC_FILES := \
     $(DEVICE_PATH)/configs/vintf/manifest-nfc.xml
 
 # Hacks
