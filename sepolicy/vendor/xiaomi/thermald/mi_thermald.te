@@ -9,9 +9,14 @@ allow mi_thermald self:capability {
   fsetid
 };
 
-# Allow mi_thermald to create files in /data/vendor/thermal/
+# Allow mi_thermald to traverse /data/vendor and create files in
+# /data/vendor/thermal/
+allow mi_thermald vendor_data_file:dir search;
 allow mi_thermald vendor_thermal_data_file:dir rw_dir_perms;
 allow mi_thermald vendor_thermal_data_file:file create_file_perms;
+
+# Allow mi_thermald to read its thermal configuration blobs
+r_dir_file(mi_thermald, vendor_configs_file)
 
 # Allow mi_thermald to read leds sysfs
 r_dir_file(mi_thermald, sysfs_leds)

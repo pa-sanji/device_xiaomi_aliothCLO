@@ -1,6 +1,9 @@
 # Xiaomi thermal daemon
 /vendor/bin/mi_thermald                     u:object_r:mi_thermald_exec:s0
 
+# Thermal map publication
+/vendor/bin/init\.mi\.thermal-map\.sh        u:object_r:vendor_thermal_map_exec:s0
+
 # Thermal data
 /data/vendor/thermal(/.*)?                  u:object_r:vendor_thermal_data_file:s0
 

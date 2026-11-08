@@ -436,6 +436,8 @@ PRODUCT_PACKAGES += \
     fstab.qcom \
     init.alioth.rc \
     init.mi.btmac.sh \
+    init.mi.thermal-map.sh \
+    init.qcom.power.rc \
     init.qti.dcvs.sh \
     init.target.rc \
     ueventd.alioth.rc
@@ -749,6 +751,9 @@ PRODUCT_PRODUCT_PROPERTIES += \
     persist.sys.fuse.passthrough.enable=true
 
 # Thermal
+PRODUCT_PACKAGES += \
+    android.hardware.thermal-service.qti
+
 PRODUCT_VENDOR_PROPERTIES += \
     vendor.sys.thermal.data.path=/data/vendor/thermal/
 

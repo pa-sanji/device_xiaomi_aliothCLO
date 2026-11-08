@@ -39,9 +39,22 @@ prebuilt_etc {
     device_specific: true,
 }
 
+prebuilt_etc {
+    name: "init.qcom.power.rc",
+    src: "init.qcom.power.rc",
+    sub_dir: "init",
+    vendor: true,
+}
+
 sh_binary {
     name: "init.mi.btmac.sh",
     src: "init.mi.btmac.sh",
+    vendor: true,
+}
+
+sh_binary {
+    name: "init.mi.thermal-map.sh",
+    src: "init.mi.thermal-map.sh",
     vendor: true,
 }
 
