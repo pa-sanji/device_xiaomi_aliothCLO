@@ -1,0 +1,4 @@
+# Allow system_server to use Qualcomm's SnapdragonServices HAL (QSPM).
+# Without this the client is denied at servicemanager and QSPM/QSPA app
+# performance hints silently fail (set_info: qspmhal unavailable).
+hal_client_domain(system_server, vendor_hal_snapx_service_qti)
