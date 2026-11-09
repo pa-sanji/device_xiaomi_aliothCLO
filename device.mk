@@ -89,6 +89,13 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libqti-perfd-client-32
 
+# alioth's stock vendor ships the HIDL 2.2 perf stack, including the
+# GameOptimizationFeature that handles the Picard 0x104A top-app hint and the
+# libgameoptfeature used by the QTI PowerHAL. Use the stock blobs instead of
+# the generic AIDL perf2 component (which has no 0x104A support on kona).
+TARGET_PROVIDES_QTI_PERF_BLOBS := true
+$(call inherit-product, device/xiaomi/alioth/perf/stock-perf.mk)
+
 # HIDL service + impls. The primary HAL is the stock alioth blob installed as
 # audio.primary.kona.so by the vendor tree.
 PRODUCT_PACKAGES += \

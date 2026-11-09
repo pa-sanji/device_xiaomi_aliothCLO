@@ -89,7 +89,8 @@ DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
 
 DEVICE_MANIFEST_FILE += \
     $(DEVICE_PATH)/configs/vintf/manifest.xml \
-    $(DEVICE_PATH)/configs/vintf/xiaomi_manifest.xml
+    $(DEVICE_PATH)/configs/vintf/xiaomi_manifest.xml \
+    $(DEVICE_PATH)/perf/vendor.qti.hardware.perf@2.2-service.xml
 
 ODM_MANIFEST_SKUS := nfc
 
