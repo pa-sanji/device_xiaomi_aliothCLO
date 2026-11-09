@@ -15,6 +15,21 @@
 
 PERF_STOCK := vendor/xiaomi/alioth/proprietary/vendor
 
+# The stock perf HAL replaces the generic AIDL perf2 component, but the
+# framework still expects the separate servicetracker HAL. Install only the
+# servicetracker AIDL service, manifest and init script; do not inherit
+# perf-vendor.mk wholesale because that also brings the incompatible generic
+# perf2 service and configs.
+PRODUCT_SOONG_NAMESPACES += vendor/qcom/common/vendor/perf
+
+PRODUCT_PACKAGES += \
+    vendor.qti.hardware.servicetrackeraidl-impl \
+    vendor.qti.hardware.servicetrackeraidl-service \
+    vendor.qti.hardware.servicetrackeraidl-service.xml
+
+PRODUCT_COPY_FILES += \
+    vendor/qcom/common/vendor/perf/proprietary/vendor/etc/init/vendor.qti.hardware.servicetrackeraidl-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.qti.hardware.servicetrackeraidl-service.rc
+
 PRODUCT_COPY_FILES += \
     $(PERF_STOCK)/bin/hw/vendor.qti.hardware.perf@2.2-service:$(TARGET_COPY_OUT_VENDOR)/bin/hw/vendor.qti.hardware.perf@2.2-service \
     $(PERF_STOCK)/etc/init/vendor.qti.hardware.perf@2.2-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.qti.hardware.perf@2.2-service.rc \
