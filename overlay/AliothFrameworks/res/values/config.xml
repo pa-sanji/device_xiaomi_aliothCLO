@@ -15,6 +15,14 @@
      limitations under the License.
 -->
 <resources>
+    <!-- The deprecated network scorer API is still advertised by GMS
+         (PersistentBoundBrokerService / android.net.action.RECOMMEND_NETWORKS),
+         but its Chimera implementation is missing and returns a 4 MiB
+         NullBinder reply. That forces TransactionTooLargeException and spams
+         libbinder with "Large reply transaction" on every network change.
+         Keep the AOSP default: no network scorer. -->
+    <string translatable="false" name="config_defaultNetworkRecommendationProviderPackage"></string>
+
     <!-- Whether the display cutout region of the main built-in display should be forced to
          black in software (to avoid aliasing or emulate a cutout that is not physically existent).
      -->
