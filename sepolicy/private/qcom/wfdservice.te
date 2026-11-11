@@ -1,0 +1,22 @@
+# Copyright (C) 2026 Paranoid Android
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# The 32-bit wfdservice enters its own minijail and reads its seccomp policy
+# from /system_ext/etc/seccomp_policy/wfdservice.policy before doing anything
+# else (android::SetUpMinijail). Everything under /system_ext is labelled
+# system_file, and no vendor domain is allowed to read system_file, so the
+# process used to abort with "Could not read base policy file" and init
+# reported init.svc.wfdservice as stopped as soon as the WFD app started it.
+allow vendor_wfdservice system_file:dir { search getattr };
+allow vendor_wfdservice system_file:file r_file_perms;

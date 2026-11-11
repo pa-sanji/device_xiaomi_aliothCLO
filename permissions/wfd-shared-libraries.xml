@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    WfdService.apk declares <uses-native-library name=".WfdService" required="true"/>,
+    but no such library is shipped. PackageManager resolves uses-native-library names
+    against <library> entries in */etc/permissions, so bind it to the library the APK
+    actually loads via System.loadLibrary("wfdnative").
+-->
+<permissions>
+    <library name=".WfdService"
+             file="/system_ext/lib64/libwfdnative.so" />
+</permissions>

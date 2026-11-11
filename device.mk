@@ -374,7 +374,6 @@ PRODUCT_VENDOR_PROPERTIES += \
     ro.vendor.display.sensortype=2 \
     vendor.display.qdcm.mode_combine=1 \
     vendor.display.defer_fps_frame_count=2 \
-    vendor.display.vds_allow_hwc=1 \
     debug.sf.disable_client_composition_cache=0 \
     debug.sf.defer_refresh_rate_when_off=1
 
@@ -828,3 +827,6 @@ PRODUCT_COPY_FILES += \
 # WFD
 PRODUCT_PACKAGES += \
     libwfdaac_vendor:32
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/permissions/wfd-shared-libraries.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/wfd-shared-libraries.xml

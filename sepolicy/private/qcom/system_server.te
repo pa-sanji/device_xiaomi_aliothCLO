@@ -2,3 +2,7 @@
 allow system_server sysfs_ion:file r_file_perms;
 
 allow system_server ion_device:chr_file r_file_perms;
+
+# Read persist.vendor.setWFDInfo.R2 on user builds. The generic QCOM policy
+# only grants this inside userdebug_or_eng().
+get_prop(system_server, vendor_wfd_sys_prop)
