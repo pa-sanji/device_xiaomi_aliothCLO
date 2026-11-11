@@ -76,6 +76,10 @@ BOARD_KERNEL_SEPARATED_DTBO := true
 # Display
 TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS := 0x546C00000000
 TARGET_NO_RAW10_CUSTOM_FORMAT := true
+# Product makefiles are parsed before BoardConfig, so display-product.mk
+# cannot see TARGET_NO_RAW10_CUSTOM_FORMAT and never sets the soong config
+# variable it drives. Set it here, where the variable is actually defined.
+$(call soong_config_set_bool,gralloc,uses_no_raw10_custom_format,true)
 TARGET_SCREEN_DENSITY := 440
 
 # Gestures
