@@ -54,6 +54,11 @@ PRODUCT_PRODUCT_PROPERTIES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     suspend.short_suspend_threshold_millis=5000
 
+# What's new
+# The setup wizard appends /{device}.json from the release notes repo.
+PRODUCT_SYSTEM_PROPERTIES += \
+    penguin.whatsnew.uri=https://raw.githubusercontent.com/pa-sanji/.github/calcite/whatsnew/{device}.json
+
 # ANT+
 PRODUCT_PACKAGES += \
     com.dsi.ant@1.0.vendor
