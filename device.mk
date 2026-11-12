@@ -491,12 +491,6 @@ PRODUCT_VENDOR_PROPERTIES += \
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     vendor.hwc.dpp.downscale=4
 
-# Lineage Health
-PRODUCT_PACKAGES += \
-    vendor.lineage.health-service.default
-
-TARGET_HEALTH_CHARGING_CONTROL_SUPPORTS_BYPASS := false
-
 # Logging
 SPAMMY_LOG_TAGS := \
     AiAiEcho \
