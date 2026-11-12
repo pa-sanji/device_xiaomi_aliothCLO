@@ -627,8 +627,8 @@ PRODUCT_PACKAGES += \
     AliothNfc \
     AliothSettings \
     AliothSystemUI \
-    AOSPAAliothFrameworks \
-    AOSPAAliothSystemUI \
+    AliothFrameworksOverlay \
+    AliothSystemUIOverlay \
     SettingsOverlayM2012K11AG \
     SettingsOverlayM2012K11AI \
     SettingsProviderM2012K11AC \
