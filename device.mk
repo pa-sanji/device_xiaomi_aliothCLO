@@ -187,6 +187,12 @@ PRODUCT_ODM_PROPERTIES += \
     vendor.audio.offload.track.enable=false \
     vendor.audio.offload.buffer.size.kb=256
 
+# Qualcomm CamX logs a benign Node Communication Service teardown race as an
+# error after every camera session. Keep fatal messages, drop the repeated
+# error spam that has no functional effect.
+PRODUCT_VENDOR_PROPERTIES += \
+    log.tag.CamX=F
+
 # Audio input-hang diagnostics (temporary bring-up build).
 # The MIUI HAL hangs in adev_open_input_stream() for CAMCORDER/BACK_MIC; enable
 # verbose logging for every HAL/AudioFlinger tag involved so the last executed
