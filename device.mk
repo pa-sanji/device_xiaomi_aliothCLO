@@ -356,11 +356,15 @@ PRODUCT_COPY_FILES += \
     system/core/libprocessgroup/profiles/task_profiles.json:$(TARGET_COPY_OUT_VENDOR)/etc/task_profiles.json
 
 # Charging
+# The kernel PD policy manager handles PPS/charge-pump selection on this
+# device. The stock Qualcomm hvdcp_opti daemon fights it (it re-negotiates
+# and hard-resets the PD contract on every attach), so keep it disabled and
+# leave PPS allowed.
 PRODUCT_VENDOR_PROPERTIES += \
     persist.vendor.cp.fcc_main_ua=400000 \
     persist.vendor.cp.taper_term_mv=7000 \
     persist.vendor.cp.qc3p5_vfloat_offset_uv=110000 \
-    persist.vendor.pps.disallowed=1 \
+    persist.vendor.pps.disallowed=0 \
     persist.vendor.hvdcp_opti.disallowed=1
 
 # Consumer IR

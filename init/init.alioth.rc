@@ -31,6 +31,12 @@ on post-fs-data
     mkdir /data/vendor/thermal/config 0771 root system
 
 on boot
+    # Charging: leave PPS allowed and keep the stock hvdcp_opti daemon off.
+    # These are persist.* props, so stale values from an older build survive
+    # an update unless they are rewritten here.
+    setprop persist.vendor.pps.disallowed 0
+    setprop persist.vendor.hvdcp_opti.disallowed 1
+
     write /sys/touchpanel/double_tap 1
     chown system system /sys/touchpanel/double_tap
     chmod 0660 /sys/touchpanel/double_tap
